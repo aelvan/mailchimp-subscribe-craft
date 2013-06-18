@@ -35,19 +35,6 @@ class MailchimpSubscribePlugin extends BasePlugin
   {
       return false;
   }
-
-
-  /**
-   * Register twig extension
-   */
-  /*
-  public function addTwigExtension()
-  {
-      Craft::import('plugins.automin.twigextensions.AutominTwigExtension');
-
-      return new AutominTwigExtension();
-  }
-  */
   
   protected function defineSettings()
   {
