@@ -113,7 +113,7 @@ a mailchimpSubscribe object to the template. It contains the following variables
 
 Error codes
 ---
-**1000:** Missing or invalid email. 
+**1000:** Missing or invalid email.   
 **2000:** Missing API key or List ID. 
 
 Any other codes are API errors, and the same code that the MailChimp API returned. [Refer to MailChimp's documentation](http://apidocs.mailchimp.com/api/1.3/exceptions.field.php).
