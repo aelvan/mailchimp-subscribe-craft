@@ -121,6 +121,9 @@ Any other codes are API errors, and the same code that the MailChimp API returne
 
 Changelog
 ---
-### Version 0.0.1
+### Version 0.2
+ - Fixed noob error, forgot to allow anonymous access to controller.
+ 
+### Version 0.1
  - Initial Public Release
 
