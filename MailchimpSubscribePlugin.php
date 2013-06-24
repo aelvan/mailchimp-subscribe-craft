@@ -18,7 +18,7 @@ class MailchimpSubscribePlugin extends BasePlugin
 
   public function getVersion()
   {
-      return '0.1';
+      return '0.2';
   }
 
   public function getDeveloper()

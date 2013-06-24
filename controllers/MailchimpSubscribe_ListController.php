@@ -8,6 +8,8 @@ class MailchimpSubscribe_ListController extends BaseController {
    *
    * @author André Elvan
    */
+
+  protected $allowAnonymous = true;
   
   public function actionSubscribe() {
     
