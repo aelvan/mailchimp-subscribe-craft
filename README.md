@@ -31,7 +31,7 @@ environment.
 
 Example Usage
 ---
-The following example shows the 
+The following example shows the plugin in use:
 
       <form class="newsletter-form" action="" method="POST">
         <input type="hidden" name="action" value="mailchimpsubscribe/list/Subscribe">
@@ -54,14 +54,16 @@ The following example shows the
         </div>
 
         <div class="field-line">
-          <label{% if (mailchimpSubscribe is defined) and (mailchimpSubscribe.errorCode=='1000') %} class="error"{% endif %}>{{ entry.emailFieldLabel }}</label>
+          <label{% if (mailchimpSubscribe is defined) and (mailchimpSubscribe.errorCode=='1000') %} class="error"{% endif %}>Email:</label>
           <input type="text" name="email" value="{% if (mailchimpSubscribe is defined) and (not mailchimpSubscribe.success) %}{{ mailchimpSubscribe.values.email }}{% endif %}"/>
         </div>
         
-        <input type="submit" name="" value="{{ entry.sendButtonLabel }}"/>
+        <input type="submit" name="" value="Subscribe"/>
       </form>
 
-If you want to display the receipt message inside the same template, you just obmit the redirect parameter. 
+This code assumes that you have a template path newsletter/receipt which the user is redirected to upon 
+successfully signing up to MailChimp. If you want to display the receipt message inside the same template, 
+you just obmit the redirect parameter: 
 
       <form class="newsletter-form" action="" method="POST">
         <input type="hidden" name="action" value="mailchimpSubscribe/list/Subscribe">
@@ -87,11 +89,11 @@ If you want to display the receipt message inside the same template, you just ob
         </div>
 
         <div class="field-line">
-          <label{% if (mailchimpSubscribe is defined) and (mailchimpSubscribe.errorCode=='1000') %} class="error"{% endif %}>{{ entry.emailFieldLabel }}</label>
+          <label{% if (mailchimpSubscribe is defined) and (mailchimpSubscribe.errorCode=='1000') %} class="error"{% endif %}>Email:</label>
           <input type="text" name="email" value="{% if (mailchimpSubscribe is defined) and (not mailchimpSubscribe.success) %}{{ mailchimpSubscribe.values.email }}{% endif %}"/>
         </div>
         
-        <input type="submit" name="" value="{{ entry.sendButtonLabel }}"/>
+        <input type="submit" name="" value="Subscribe"/>
       </form>
 
 Any other list variables you have configured in MailChimp can be added with formfields with name values like mcvars[YOURMCVAR].
