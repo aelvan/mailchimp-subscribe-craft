@@ -35,6 +35,22 @@ class MailchimpSubscribe_ListController extends BaseController {
         
         
         if ($api->errorCode) { // an api error occured 
+
+
+          // Respond appropriately to Ajax Requests
+          if (craft()->request->isAjaxRequest())
+          {
+            $this->returnJson(array(
+              'success' => false,
+              'errorCode' => $api->errorCode,
+              'message' => 'An API error has occured: ' . $api->errorCode . ' - ' . $api->errorMessage,
+              'values' => array(
+                'email' => $email,
+                'vars' => $vars
+              )
+            ));
+          }
+
           
           craft()->urlManager->setRouteVariables(array(
             'mailchimpSubscribe' => array(
@@ -49,6 +65,23 @@ class MailchimpSubscribe_ListController extends BaseController {
           ));
           
         } else { // list subscribe was successful
+
+
+
+          // Respond appropriately to Ajax Requests
+          if (craft()->request->isAjaxRequest())
+          {
+            return $this->returnJson(array(
+              'success' => true,
+              'errorCode' => 1,
+              'values' => array(
+                'email' => $email,
+                'vars' => $vars
+              )
+            ));
+          }
+
+
           
           if ($redirect!='') { // if a redirect url was set in template form, redirect to this
             $this->redirectToPostedUrl();
@@ -68,6 +101,20 @@ class MailchimpSubscribe_ListController extends BaseController {
         }
         
       } else { // error, no api key or list id
+
+        // Respond appropriately to Ajax Requests
+        if (craft()->request->isAjaxRequest())
+        {
+          $this->returnJson(array(
+            'success' => false,
+            'errorCode' => 2000,
+            'message' => 'API Key or List ID not supplied. Check your settings.',
+            'values' => array(
+              'email' => $email,
+              'vars' => $vars
+            )
+          ));
+        }
         
         craft()->urlManager->setRouteVariables(array(
           'mailchimpSubscribe' => array(
@@ -84,6 +131,20 @@ class MailchimpSubscribe_ListController extends BaseController {
       }
       
     } else { // error, no email or invalid
+
+      // Respond appropriately to Ajax Requests
+      if (craft()->request->isAjaxRequest())
+      {
+        $this->returnJson(array(
+          'success' => false,
+          'errorCode' => 1000,
+          'message' => 'Email invalid',
+          'values' => array(
+            'email' => $email,
+            'vars' => $vars
+          )
+        ));
+      }
       
       craft()->urlManager->setRouteVariables(array(
         'mailchimpSubscribe' => array(
