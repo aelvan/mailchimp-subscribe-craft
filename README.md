@@ -121,8 +121,39 @@ Error codes
 Any other codes are API errors, and the same code that the MailChimp API returned. [Refer to MailChimp's documentation](http://apidocs.mailchimp.com/api/1.3/exceptions.field.php).
 
 
+Ajax submitting
+---
+If the form is submitted with Ajax, the plugin will return a JSON object with the same keys as the template object described above. Big up to [Jake Chapman](https://github.com/imjakechapman) for implementing this. :)
+
+Example:
+
+      $('form').on("submit", function(event) {
+        event.preventDefault();
+      
+        $.post('/', $(this).serialize())
+        .done( function(data) {
+      
+          if (!data.success)
+          {
+            // there was an error, do something with data
+            alert(data.message);
+          }
+          else
+          {
+            // Success
+            alert("WEEEEEEEEEE");
+          }
+      
+        });
+      });
+
+
+
 Changelog
 ---
+### Version 0.3
+ - Mailchimp Subscribe now returns JSON if form was submitted with Ajax (pull request from [Jake Chapman](https://github.com/imjakechapman)). 
+ 
 ### Version 0.2
  - Fixed noob error, forgot to allow anonymous access to controller.
  
