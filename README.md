@@ -34,7 +34,7 @@ Example Usage
 The following example shows the plugin in use:
 
       <form class="newsletter-form" action="" method="POST">
-        <input type="hidden" name="action" value="mailchimpsubscribe/list/Subscribe">
+        <input type="hidden" name="action" value="mailchimpSubscribe/list/Subscribe">
         <input type="hidden" name="redirect" value="newsletter/receipt">
         
         {% if mailchimpSubscribe is defined %}
