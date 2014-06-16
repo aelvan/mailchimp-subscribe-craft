@@ -178,7 +178,7 @@ class MailchimpSubscribe_ListController extends BaseController {
 
     $settings = array();
     $settings['mcsubApikey'] = craft()->config->get('mcsubApikey')!==null ? craft()->config->get('mcsubApikey') : $plugin_settings['mcsubApikey'];
-    if($mcFormListId !==null){
+    if($mcFormListId !==null && trim($mcFormListId) !=""){
       $settings['mcsubListId'] = $mcFormListId;
     }else{
       $settings['mcsubListId'] = craft()->config->get('mcsubListId')!==null ? craft()->config->get('mcsubListId') : $plugin_settings['mcsubListId'];
