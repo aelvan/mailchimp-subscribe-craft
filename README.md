@@ -28,6 +28,11 @@ environment.
     'mcsubApikey' => 'xxxxxxxxxxxxxxxxxxxxx-us2',
     'mcsubListId' => '2fd6ec09cf',
 
+If you have multiple lists you want users to subscribe to, each form can have a hidden field with a name of "lid" and the "value" as your list id. The plugin will use this list id on form submit. 
+
+####Example
+	<input type="hidden" name="lid" value="2fd6ec09cf">
+
 
 Example Usage
 ---
