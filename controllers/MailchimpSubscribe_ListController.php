@@ -15,6 +15,7 @@ class MailchimpSubscribe_ListController extends BaseController {
     
     // get post variables
     $email = craft()->request->getParam('email', '');
+    $formListId = craft()->request->getParam('lid', '');
     $vars = craft()->request->getParam('mcvars', array());
     $redirect = craft()->request->getParam('redirect', '');
     
@@ -24,7 +25,8 @@ class MailchimpSubscribe_ListController extends BaseController {
       require_once(CRAFT_PLUGINS_PATH.'mailchimpsubscribe/vendor/mcapi/MCAPI.class.php');
       
       // get plugin settings
-      $settings = $this->_init_settings();
+      // passes list id from form value lid
+      $settings = $this->_init_settings($formListId);
       
       // check if we got an api key and a list id
       if ($settings['mcsubApikey']!='' && $settings['mcsubListId']!='') {
@@ -165,17 +167,23 @@ class MailchimpSubscribe_ListController extends BaseController {
 
   /**
    * Gets plugin settings, either from saved settings or from config
+   * List ID can originate via the form, settings or from config.
    *
    * @return array Array containing all settings
    * @author André Elvan
    */
-  private function _init_settings() {
+  private function _init_settings($mcFormListId) {
     $plugin = craft()->plugins->getPlugin('mailchimpsubscribe');
     $plugin_settings = $plugin->getSettings();
 
     $settings = array();
     $settings['mcsubApikey'] = craft()->config->get('mcsubApikey')!==null ? craft()->config->get('mcsubApikey') : $plugin_settings['mcsubApikey'];
-    $settings['mcsubListId'] = craft()->config->get('mcsubListId')!==null ? craft()->config->get('mcsubListId') : $plugin_settings['mcsubListId'];
+    if($mcFormListId !==null && trim($mcFormListId) !=""){
+      $settings['mcsubListId'] = $mcFormListId;
+    }else{
+      $settings['mcsubListId'] = craft()->config->get('mcsubListId')!==null ? craft()->config->get('mcsubListId') : $plugin_settings['mcsubListId'];
+    }
+    
 
     return $settings;
   }
