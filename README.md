@@ -36,7 +36,7 @@ If you have multiple lists you want users to subscribe to, each form can have a 
 If you want to subscribe to several lists from the same form, you can send in several list id's as a piped list.
 
 ####Example
-	<input type="hidden" name="lid" value="5fe66521c0">
+	<input type="hidden" name="lid" value="2fd6ec09cf|5fe66521c0">
 
 
 Example Usage
