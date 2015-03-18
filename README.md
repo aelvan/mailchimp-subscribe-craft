@@ -33,6 +33,11 @@ If you have multiple lists you want users to subscribe to, each form can have a 
 ####Example
 	<input type="hidden" name="lid" value="2fd6ec09cf">
 
+If you want to subscribe to several lists from the same form, you can send in several list id's as a piped list.
+
+####Example
+	<input type="hidden" name="lid" value="5fe66521c0">
+
 
 Example Usage
 ---
@@ -156,6 +161,9 @@ Example:
 
 Changelog
 ---
+### Version 0.4
+ - Added support for multiple list id's.
+ 
 ### Version 0.3
  - Mailchimp Subscribe now returns JSON if form was submitted with Ajax (pull request from [Jake Chapman](https://github.com/imjakechapman)). 
  

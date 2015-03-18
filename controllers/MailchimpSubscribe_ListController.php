@@ -26,18 +26,25 @@ class MailchimpSubscribe_ListController extends BaseController {
       
       // get plugin settings
       // passes list id from form value lid
-      $settings = $this->_init_settings($formListId);
+      $settings = $this->_init_settings();
+      
+      $listIdStr =  $formListId != '' ? $formListId : $settings['mcsubListId'];
       
       // check if we got an api key and a list id
-      if ($settings['mcsubApikey']!='' && $settings['mcsubListId']!='') {
+      if ($settings['mcsubApikey']!='' && $listIdStr!='') {
         
         // create a new api instance, and subscribe
         $api = new \MCAPI($settings['mcsubApikey']);
-        $retval = $api->listSubscribe( $settings['mcsubListId'], $email, $vars );
         
+        // split id string on | in case more than one list id is supplied
+        $listIdArr = explode("|", $listIdStr);
+
+        // loop over list id's and subscribe
+        foreach ($listIdArr as $listId) {
+          $retval = $api->listSubscribe($listId, $email, $vars);
+        }
         
         if ($api->errorCode) { // an api error occured 
-
 
           // Respond appropriately to Ajax Requests
           if (craft()->request->isAjaxRequest())
@@ -52,7 +59,6 @@ class MailchimpSubscribe_ListController extends BaseController {
               )
             ));
           }
-
           
           craft()->urlManager->setRouteVariables(array(
             'mailchimpSubscribe' => array(
@@ -67,8 +73,6 @@ class MailchimpSubscribe_ListController extends BaseController {
           ));
           
         } else { // list subscribe was successful
-
-
 
           // Respond appropriately to Ajax Requests
           if (craft()->request->isAjaxRequest())
@@ -163,8 +167,6 @@ class MailchimpSubscribe_ListController extends BaseController {
     
   }
 
-
-
   /**
    * Gets plugin settings, either from saved settings or from config
    * List ID can originate via the form, settings or from config.
@@ -172,22 +174,16 @@ class MailchimpSubscribe_ListController extends BaseController {
    * @return array Array containing all settings
    * @author André Elvan
    */
-  private function _init_settings($mcFormListId) {
+  private function _init_settings() {
     $plugin = craft()->plugins->getPlugin('mailchimpsubscribe');
     $plugin_settings = $plugin->getSettings();
 
     $settings = array();
     $settings['mcsubApikey'] = craft()->config->get('mcsubApikey')!==null ? craft()->config->get('mcsubApikey') : $plugin_settings['mcsubApikey'];
-    if($mcFormListId !==null && trim($mcFormListId) !=""){
-      $settings['mcsubListId'] = $mcFormListId;
-    }else{
-      $settings['mcsubListId'] = craft()->config->get('mcsubListId')!==null ? craft()->config->get('mcsubListId') : $plugin_settings['mcsubListId'];
-    }
-    
+    $settings['mcsubListId'] = craft()->config->get('mcsubListId')!==null ? craft()->config->get('mcsubListId') : $plugin_settings['mcsubListId'];
 
     return $settings;
   }
-  
 
   /**
    * Validate an email address.
@@ -262,5 +258,4 @@ class MailchimpSubscribe_ListController extends BaseController {
     }
     return $isValid;
   }
-  
 }
