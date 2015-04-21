@@ -18,15 +18,15 @@ Configuration
 To use the plugin you need to create an API key from the MailChimp control panel, and create a list (or use one you already have). 
 
 You can configure MailChimp Subscribe either through the plugins settings in the control panel, or 
-by adding the settings to the general config file (usually found in /craft/config/general.php). Configuring it in
-the settings file is more flexible, since you can set up the config file to have different settings depending on the 
-environment.
+by adding the settings to the general config file (usually found in /craft/config/general.php). Configuring it in the settings file is more flexible, since you can set up the config file to have different settings depending on the environment.
+
 
 
 ####Example
 
     'mcsubApikey' => 'xxxxxxxxxxxxxxxxxxxxx-us2',
     'mcsubListId' => '2fd6ec09cf',
+    'mcsubDoubleOptIn => false
 
 If you have multiple lists you want users to subscribe to, each form can have a hidden field with a name of "lid" and the "value" as your list id. The plugin will use this list id on form submit. 
 
@@ -161,6 +161,9 @@ Example:
 
 Changelog
 ---
+### Version 0.5
+ - Added support for disabling double opt-in (particularly useful with Ajax submission).
+
 ### Version 0.4
  - Added support for multiple list id's.
  
