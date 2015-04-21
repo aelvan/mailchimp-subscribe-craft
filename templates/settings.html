@@ -6,7 +6,7 @@
 <div class="field" id="mcsubApikey-field">
   <div class="heading">
     <label for="mcsubApikey">API Key</label>
-		<p class="instructions">Create it in your mailchimp account</p>
+		<p class="instructions">Create it in your MailChimp account</p>
   </div>
 	<div class="input">
 		<input class="text fullwidth" type="text" id="mcsubApikey" name="mcsubApikey" value="{% if config_settings.mcsubApikey is not null %}{{ config_settings.mcsubApikey }}{% else %}{{ settings.mcsubApikey }}{% endif %}"{% if config_settings.mcsubApikey is not null %} disabled="disabled"{% endif %}>
@@ -31,7 +31,7 @@
 
 {{ forms.lightswitchField({
         label: "Double Opt-In"|t,
-        instructions: "Optional flag to control whether a double opt-in confirmation message is sent, defaults to true."|t,
+        instructions: "Optional flag to control whether a double opt-in confirmation message is sent, defaults to <code>true</code>. <em>Abusing this may cause your account to be suspended.</em>"|t,
         id: 'mcsubDoubleOptIn',
         name: 'mcsubDoubleOptIn',
         on: settings.mcsubDoubleOptIn,
