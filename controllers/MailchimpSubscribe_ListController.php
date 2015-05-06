@@ -10,41 +10,41 @@ class MailchimpSubscribe_ListController extends BaseController {
    */
 
   protected $allowAnonymous = true;
-  
+
   public function actionSubscribe() {
-    
+
     // get post variables
     $email = craft()->request->getParam('email', '');
     $formListId = craft()->request->getParam('lid', '');
     $vars = craft()->request->getParam('mcvars', array());
     $redirect = craft()->request->getParam('redirect', '');
-    
+
     if ($email!='' && $this->_validateEmail($email)) { // validate email
-      
+
       // include mailchimp api class
       require_once(CRAFT_PLUGINS_PATH.'mailchimpsubscribe/vendor/mcapi/MCAPI.class.php');
-      
+
       // get plugin settings
       // passes list id from form value lid
       $settings = $this->_init_settings();
-      
+
       $listIdStr =  $formListId != '' ? $formListId : $settings['mcsubListId'];
-      
+
       // check if we got an api key and a list id
       if ($settings['mcsubApikey']!='' && $listIdStr!='') {
-        
+
         // create a new api instance, and subscribe
         $api = new \MCAPI($settings['mcsubApikey']);
-        
+
         // split id string on | in case more than one list id is supplied
         $listIdArr = explode("|", $listIdStr);
 
         // loop over list id's and subscribe
         foreach ($listIdArr as $listId) {
-          $retval = $api->listSubscribe($listId, $email, $vars);
+          $retval = $api->listSubscribe($listId, $email, $vars, $emailType = 'html', $settings['mcsubDoubleOptIn']);
         }
-        
-        if ($api->errorCode) { // an api error occured 
+
+        if ($api->errorCode) { // an api error occured
 
           // Respond appropriately to Ajax Requests
           if (craft()->request->isAjaxRequest())
@@ -59,7 +59,7 @@ class MailchimpSubscribe_ListController extends BaseController {
               )
             ));
           }
-          
+
           craft()->urlManager->setRouteVariables(array(
             'mailchimpSubscribe' => array(
               'success' => false,
@@ -71,7 +71,7 @@ class MailchimpSubscribe_ListController extends BaseController {
               )
             )
           ));
-          
+
         } else { // list subscribe was successful
 
           // Respond appropriately to Ajax Requests
@@ -88,7 +88,7 @@ class MailchimpSubscribe_ListController extends BaseController {
           }
 
 
-          
+
           if ($redirect!='') { // if a redirect url was set in template form, redirect to this
             $this->redirectToPostedUrl();
           } else {
@@ -105,7 +105,7 @@ class MailchimpSubscribe_ListController extends BaseController {
             ));
           }
         }
-        
+
       } else { // error, no api key or list id
 
         // Respond appropriately to Ajax Requests
@@ -121,7 +121,7 @@ class MailchimpSubscribe_ListController extends BaseController {
             )
           ));
         }
-        
+
         craft()->urlManager->setRouteVariables(array(
           'mailchimpSubscribe' => array(
             'success' => false,
@@ -133,9 +133,9 @@ class MailchimpSubscribe_ListController extends BaseController {
             )
           )
         ));
-        
+
       }
-      
+
     } else { // error, no email or invalid
 
       // Respond appropriately to Ajax Requests
@@ -151,7 +151,7 @@ class MailchimpSubscribe_ListController extends BaseController {
           )
         ));
       }
-      
+
       craft()->urlManager->setRouteVariables(array(
         'mailchimpSubscribe' => array(
           'success' => false,
@@ -164,7 +164,7 @@ class MailchimpSubscribe_ListController extends BaseController {
         )
       ));
     }
-    
+
   }
 
   /**
@@ -181,6 +181,7 @@ class MailchimpSubscribe_ListController extends BaseController {
     $settings = array();
     $settings['mcsubApikey'] = craft()->config->get('mcsubApikey')!==null ? craft()->config->get('mcsubApikey') : $plugin_settings['mcsubApikey'];
     $settings['mcsubListId'] = craft()->config->get('mcsubListId')!==null ? craft()->config->get('mcsubListId') : $plugin_settings['mcsubListId'];
+    $settings['mcsubDoubleOptIn'] = craft()->config->get('mcsubDoubleOptIn')!==null ? craft()->config->get('mcsubDoubleOptIn') : $plugin_settings['mcsubDoubleOptIn'];
 
     return $settings;
   }
@@ -188,9 +189,9 @@ class MailchimpSubscribe_ListController extends BaseController {
   /**
    * Validate an email address.
    * Provide email address (raw input)
-   * Returns true if the email address has the email 
+   * Returns true if the email address has the email
    * address format and the domain exists.
-   * 
+   *
    * @param string Email to validate
    * @return boolean
    * @author André Elvan
@@ -242,7 +243,7 @@ class MailchimpSubscribe_ListController extends BaseController {
       (!preg_match('/^(\\\\.|[A-Za-z0-9!#%&`_=\\/$\'*+?^{}|~.-])+$/',
         str_replace("\\\\","",$local)))
       {
-        // character not valid in local part unless 
+        // character not valid in local part unless
         // local part is quoted
         if (!preg_match('/^"(\\\\"|[^"])+"$/',
           str_replace("\\\\","",$local)))
