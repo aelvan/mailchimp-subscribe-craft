@@ -17,6 +17,11 @@ class MailchimpSubscribe_ListController extends BaseController {
     $email = craft()->request->getParam('email', '');
     $formListId = craft()->request->getParam('lid', '');
     $vars = craft()->request->getParam('mcvars', array());
+    $doubleOptIn = craft()->request->getParam('double_optin');
+    $emailType = craft()->request->getParam('email_type');
+    $updateExisting = craft()->request->getParam('update_existing');
+    $replaceInterests = craft()->request->getParam('replace_interests');
+    $sendWelcome = craft()->request->getParam('send_welcome');
     $redirect = craft()->request->getParam('redirect', '');
     
     if ($email!='' && $this->_validateEmail($email)) { // validate email
@@ -41,7 +46,7 @@ class MailchimpSubscribe_ListController extends BaseController {
 
         // loop over list id's and subscribe
         foreach ($listIdArr as $listId) {
-          $retval = $api->listSubscribe($listId, $email, $vars);
+          $retval = $api->listSubscribe($listId, $email, $vars, $emailType, $doubleOptIn, $updateExisting, $replaceInterests, $sendWelcome);
         }
         
         if ($api->errorCode) { // an api error occured 
