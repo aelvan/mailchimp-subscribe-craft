@@ -41,7 +41,7 @@ class MailchimpSubscribePlugin extends BasePlugin
     return array(
          'mcsubApikey'      => array(AttributeType::String, 'default' => ''),
          'mcsubListId'      => array(AttributeType::String, 'default' => ''),
-         'mcsubDoubleOptIn' => array(AttributeType::Bool, 'default' => 'true')
+         'mcsubDoubleOptIn' => array(AttributeType::Bool, 'default' => true)
     );
   }
 
