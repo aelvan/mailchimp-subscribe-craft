@@ -44,127 +44,61 @@ class MailchimpSubscribe_ListController extends BaseController {
           $retval = $api->listSubscribe($listId, $email, $vars, $emailType = 'html', $settings['mcsubDoubleOptIn']);
         }
 
-        if ($api->errorCode) { // an api error occured
-
-          // Respond appropriately to Ajax Requests
-          if (craft()->request->isAjaxRequest())
-          {
-            $this->returnJson(array(
-              'success' => false,
-              'errorCode' => $api->errorCode,
-              'message' => 'An API error has occured: ' . $api->errorCode . ' - ' . $api->errorMessage,
-              'values' => array(
-                'email' => $email,
-                'vars' => $vars
-              )
-            ));
-          }
-
-          craft()->urlManager->setRouteVariables(array(
-            'mailchimpSubscribe' => array(
-              'success' => false,
-              'errorCode' => $api->errorCode, // set errorCode to match actual mailchimp api error, see http://apidocs.mailchimp.com/api/1.3/exceptions.field.php
-              'message' => 'An API error occured: ' . $api->errorCode . ' - ' . $api->errorMessage,
-              'values' => array(
-                'email' => $email,
-                'vars' => $vars
-              )
-            )
-          ));
-
-        } else { // list subscribe was successful
-
-          // Respond appropriately to Ajax Requests
-          if (craft()->request->isAjaxRequest())
-          {
-            return $this->returnJson(array(
-              'success' => true,
-              'errorCode' => 1,
-              'values' => array(
-                'email' => $email,
-                'vars' => $vars
-              )
-            ));
-          }
-
-
-
-          if ($redirect!='') { // if a redirect url was set in template form, redirect to this
-            $this->redirectToPostedUrl();
-          } else {
-            craft()->urlManager->setRouteVariables(array(
-              'mailchimpSubscribe' => array(
-                'success' => true,
-                'errorCode' => 1,
-                'message' => '',
-                'values' => array(
-                  'email' => $email,
-                  'vars' => $vars
-                )
-              )
-            ));
-          }
+        if ($api->errorCode) {
+          // an API error occurred
+          $this->_setMessage($api->errorCode, $email, $vars, $api->errorMessage);
+        } else {
+          // list subscribe was successful
+          $this->_setMessage(200, $email, $vars, "Subscribed successfully", true, $redirect);
         }
 
-      } else { // error, no api key or list id
-
-        // Respond appropriately to Ajax Requests
-        if (craft()->request->isAjaxRequest())
-        {
-          $this->returnJson(array(
-            'success' => false,
-            'errorCode' => 2000,
-            'message' => 'API Key or List ID not supplied. Check your settings.',
-            'values' => array(
-              'email' => $email,
-              'vars' => $vars
-            )
-          ));
-        }
-
-        craft()->urlManager->setRouteVariables(array(
-          'mailchimpSubscribe' => array(
-            'success' => false,
-            'errorCode' => 2000,
-            'message' => 'API Key or List ID not supplied. Check your settings.',
-            'values' => array(
-              'email' => $email,
-              'vars' => $vars
-            )
-          )
-        ));
-
+      } else {
+        // error, no API key or list id
+        $this->_setMessage(2000, $email, $vars, "API Key or List ID not supplied. Check your settings.");
       }
 
-    } else { // error, no email or invalid
+    } else { 
+      // error, invalid email
+      $this->_setMessage(1000, $email, $vars, "Invalid email");
+    }
 
-      // Respond appropriately to Ajax Requests
-      if (craft()->request->isAjaxRequest())
-      {
-        $this->returnJson(array(
-          'success' => false,
-          'errorCode' => 1000,
-          'message' => 'Email invalid',
+  }
+
+  /**
+  * Set a message for use in the templates
+  *
+  * @author Martin Blackburn
+  */
+  private function _setMessage($errorcode, $email, $vars, $message = '', $success = false, $redirect = '')
+  {
+    if (craft()->request->isAjaxRequest()) {
+      return $this->returnJson(array(
+          'success' => $success,
+          'errorCode' => $errorcode,
+          'message' => $message,
           'values' => array(
             'email' => $email,
             'vars' => $vars
-          )
-        ));
-      }
-
-      craft()->urlManager->setRouteVariables(array(
-        'mailchimpSubscribe' => array(
-          'success' => false,
-          'errorCode' => 1000,
-          'message' => 'Email invalid',
-          'values' => array(
-            'email' => $email,
-            'vars' => $vars
-          )
         )
       ));
     }
 
+    if ($redirect!='') {
+      // if a redirect url was set in template form, redirect to this
+      $this->redirectToPostedUrl();
+    } else {
+      craft()->urlManager->setRouteVariables(array(
+          'mailchimpSubscribe' => array(
+            'success' => $success,
+            'errorCode' => $errorcode,
+            'message' => $message,
+            'values' => array(
+              'email' => $email,
+              'vars' => $vars
+          )
+        )
+      ));
+    }
   }
 
   /**
