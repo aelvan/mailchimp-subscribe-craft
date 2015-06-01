@@ -69,7 +69,7 @@ class MailchimpSubscribe_ListController extends BaseController {
   *
   * @author Martin Blackburn
   */
-  private function _setMessage($errorcode, $email, $vars, $message = '', $success = false, $reditect = '')
+  private function _setMessage($errorcode, $email, $vars, $message = '', $success = false, $redirect = '')
   {
     if (craft()->request->isAjaxRequest()) {
       return $this->returnJson(array(
