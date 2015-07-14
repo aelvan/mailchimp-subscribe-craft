@@ -108,6 +108,12 @@ you just obmit the redirect parameter:
 
 Any other list variables you have configured in MailChimp can be added with formfields with name values like mcvars[YOURMCVAR].
 
+Groups can be added by giving inputs a `name` attribute with the format `mcvars[group][X][Y]`, where `X` is the group's ID and `Y` is the name of a group's option. The easiest way to find your group's ID is via "Signup Forms > Embedded forms", and looking at the generated source code. [This](http://kb.mailchimp.com/lists/signup-forms/manage-groups-in-advanced-forms) page explains this process a little further. 
+
+For example, if we have the group "Interests" with the values "Branding" and "Social Media", our form would like this:
+
+     <label for="checkbox-1"><input type="checkbox" id="checkbox-1" name="mcvars[group][4329]['Branding']" value="Branding" {% if (mailchimpSubscribe is defined) and (not mailchimpSubscribe.success) and (mailchimpSubscribe.values.vars.group[4329]['Branding'] is defined) %}checked{% endif %}>Branding</label>
+     <label for="checkbox-2"><input type="checkbox" id="checkbox-2" name="mcvars[group][4329]['Social Media']" value="Social Media" {% if (mailchimpSubscribe is defined) and (not mailchimpSubscribe.success) and (mailchimpSubscribe.values.vars.group[4329]['Social Media'] is defined) %}checked{% endif %}>Social Media</label>
 
 The mailchimpSubscribe object
 ---
