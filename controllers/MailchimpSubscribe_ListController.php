@@ -40,7 +40,7 @@ class MailchimpSubscribe_ListController extends BaseController {
         $listIdArr = explode("|", $listIdStr);
 
         // convert groups to input format if present
-        if( $vars['group'] && count($vars['group']) ) {
+        if( isset($vars['group']) && count($vars['group']) ) {
           $vars['GROUPINGS'] = array();
           foreach($vars['group'] as $key=>$vals) {
             $vars['GROUPINGS'][] = array('id'=>$key,'groups'=>implode(',',$vals));
