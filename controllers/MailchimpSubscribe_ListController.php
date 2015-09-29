@@ -72,6 +72,61 @@ class MailchimpSubscribe_ListController extends BaseController {
 
   }
 
+
+  public function actionCheckIfSubscribed (){
+
+    // get post variables
+    $email = craft()->request->getParam('email', '');
+    $formListId = craft()->request->getParam('lid', '');
+    $vars = craft()->request->getParam('mcvars', array());
+    $redirect = craft()->request->getParam('redirect', '');
+
+    if ($email!='' && $this->_validateEmail($email)) { // validate email
+
+      // include mailchimp api class
+      require_once(CRAFT_PLUGINS_PATH.'mailchimpsubscribe/vendor/mcapi/MCAPI.class.php');
+
+      // get plugin settings
+      // passes list id from form value lid
+      $settings = $this->_init_settings();
+
+      $listIdStr =  $formListId != '' ? $formListId : $settings['mcsubListId'];
+
+      // check if we got an api key and a list id
+      if ($settings['mcsubApikey']!='' && $listIdStr!='') {
+
+        // create a new api instance, and check if this user is on this list
+        $api = new \MCAPI($settings['mcsubApikey']);
+        
+        $retval = $api->listMemberInfo($listIdStr, $email);
+
+        if ($api->errorCode) {
+          // an API error occurred
+          $this->_setMessage($api->errorCode, $email, $vars, $api->errorMessage);
+        } else {
+          if($retval['errors']){
+            $this->_setMessage(1000, $email, $vars, "The email address passed does not exist on this list", false, $redirect);
+          }else{
+            $vars['subscriberInfo'] = $retval;
+            $this->_setMessage(200, $email, $vars, "The email address passed exists on this list", true, $redirect);
+          }
+        }
+
+      } else {
+        // error, no API key or list id
+        $this->_setMessage(2000, $email, $vars, "API Key or List ID not supplied. Check your settings.", false, $redirect);
+      }
+
+    } else { 
+      // error, invalid email
+      $this->_setMessage(1000, $email, $vars, "Invalid email", false, $redirect);
+    }
+
+  }
+
+
+
+
   /**
   * Set a message for use in the templates
   *

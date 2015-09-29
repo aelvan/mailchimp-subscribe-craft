@@ -1,7 +1,7 @@
 Introduction
 ---
-MailChimp Subscribe for [Craft](http://buildwithcraft.com/) is a very simple plugin for subscribing to a MailChimp newsletter list. 
-The only thing it does is use the API to sign up, nothing more, nothing less. :) 
+MailChimp Subscribe for [Craft](http://buildwithcraft.com/) is a very simple plugin for subscribing to a MailChimp newsletter list.  It also has an action to check if a user is subscribed to a list.
+Those two things, nothing more, nothing less. :) 
 
 
 Installation
@@ -128,6 +128,51 @@ a mailchimpSubscribe object to the template. It contains the following variables
 
 **mailchimpSubscribe.values (Object):** A structure containing the values that were submitted. For instance mailchimpSubscribe.values.email and mailchimpSubscribe.values.vars.FNAME.
 
+Checking if an email is already on a list
+---
+Sometimes you might want to know if a user is already on an email list - for example during a cart checkout.  It's nice not to bother your existing customers with repeated requests to subscribe to your mailing list, so if this check shows they're already subscribed, you can hide your subscribe form.
+
+Here's an example that should get you started implementing such behaviour:
+
+      <p>Check if a user is on our mailing list</p>
+
+      <form method="POST" id="testMCOnList">
+          {{ getCsrfInput() }}
+          <input type="hidden" name="action" value="mailchimpSubscribe/list/CheckIfSubscribed">
+
+          Enter email to check: <input type="text" id="email" size="40" name="email" >
+
+          <input type="submit" class="btn" value="Check if subscribed">
+      </form>
+
+      <h3> Results: </h3>
+      <span id="results"></span>
+
+And some jquery to do the actual check:
+
+    $('#testMCOnList').on('submit', function(e) {
+
+        e.preventDefault();
+
+        $.ajax({
+              type: 'POST',
+              url: '',
+              data: $(this).serialize(),
+              success: function( response ) {
+                if(response.success){
+                    $('#results').html("On List");
+                     //hide your form here
+                     //Also, response.vars.subscriberInfo will contain a bunch of info about the user should you want it
+                }
+                else{
+                    $('#results').html("Not On List");
+                    //display your subscribe form here
+                }
+              },
+        });
+
+    });
+
 
 Error codes
 ---
@@ -167,6 +212,9 @@ Example:
 
 Changelog
 ---
+### Version 0.6
+ - Added new action CheckIsSubscribed to check if an email is already on list [Jeremy Daalder](https://github.com/bossanova808)
+
 ### Version 0.5
  - Added support for disabling double opt-in (particularly useful with Ajax submission).
 
