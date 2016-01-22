@@ -1,0 +1,14 @@
+[
+    {
+        "version": "1.0.0",
+        "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
+        "date": "2010-01-22T23:50:00+02:00",
+        "notes": [
+            "[improved] Refactored alot of code!",
+            "[improved] The plugin is now using the MailChimp API 3.0.",
+            "[Added] The plugin now has a service layer that other plugins can tap into.",
+            "[Added] Subscribe results from multiple lists are now returned in a separate listResults array in the mailchimpSubscribe variable.",
+            "[Added] Added Craft 2.5 plugin stuff."
+        ]
+    }
+]

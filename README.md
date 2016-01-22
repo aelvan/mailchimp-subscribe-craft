@@ -1,28 +1,28 @@
 Introduction
 ---
-MailChimp Subscribe for [Craft](http://buildwithcraft.com/) is a very simple plugin for subscribing to a MailChimp newsletter list.  It also has an action to check if a user is subscribed to a list.
-Those two things, nothing more, nothing less. :) 
+MailChimp Subscribe for [Craft](http://craftcms.com/) is a very simple plugin for subscribing to a MailChimp newsletter list.  It can also check if a user is subscribed to a list.
 
 
 Installation
 ---
-1. Download and extract the contents of the zip. Copy the /mailchimpsubscribe folder to your Craft plugin folder. 
-2. Enable the MailChimp Subscribe plugin in Craft (Settings > Plugins).
-3. Click on the plugin name to configure the plugin settings, or configure it via the general config file (see "Configuration" below).
-4. Add a form for signing up to your templates (see "Example Usage" below). 
+1. Download and extract the contents of the zip. Put the `mailchimpsubscribe` folder to your Craft plugin folder.   
+2. Enable the MailChimp Subscribe plugin in Craft (Settings > Plugins).  
+3. Configure the plugin either in the plugin settings page in the control panel, or configure it via the general config file (see "Configuration" below).  
+4. Add a form for signing up to your templates (see "Example Usage" below).  
 5. Eat a banana.
 
 
 Configuration
 ---
-To use the plugin you need to create an API key from the MailChimp control panel, and create a list (or use one you already have). 
+To use the plugin you need to create an API key from the MailChimp control panel, and create a list (or use one that you already have). 
 
 You can configure MailChimp Subscribe either through the plugins settings in the control panel, or 
-by adding the settings to the general config file (usually found in /craft/config/general.php). Configuring it in the settings file is more flexible, since you can set up the config file to have different settings depending on the environment.
+by adding the settings to the general config file (usually found in /craft/config/general.php).
+Configuring it in the settings file is more flexible, since you can set up the config file to have
+different settings depending on the environment.
 
 
-
-####Example
+### Example
 
     'mcsubApikey' => 'xxxxxxxxxxxxxxxxxxxxx-us2',
     'mcsubListId' => '2fd6ec09cf',
@@ -30,12 +30,12 @@ by adding the settings to the general config file (usually found in /craft/confi
 
 If you have multiple lists you want users to subscribe to, each form can have a hidden field with a name of "lid" and the "value" as your list id. The plugin will use this list id on form submit. 
 
-####Example
+### Example
 	<input type="hidden" name="lid" value="2fd6ec09cf">
 
 If you want to subscribe to several lists from the same form, you can send in several list id's as a piped list.
 
-####Example
+### Example
 	<input type="hidden" name="lid" value="2fd6ec09cf|5fe66521c0">
 
 
@@ -128,6 +128,8 @@ a mailchimpSubscribe object to the template. It contains the following variables
 
 **mailchimpSubscribe.values (Object):** A structure containing the values that were submitted. For instance mailchimpSubscribe.values.email and mailchimpSubscribe.values.vars.FNAME.
 
+**If you submit multiple list ids are submitted, the mailchimpSubscribe object will contain a listResults array containing the results for each list. If an error occured for one of the lists, the base object will contain the error.**
+
 Checking if an email is already on a list
 ---
 Sometimes you might want to know if a user is already on an email list - for example during a cart checkout.  It's nice not to bother your existing customers with repeated requests to subscribe to your mailing list, so if this check shows they're already subscribed, you can hide your subscribe form.
@@ -179,7 +181,7 @@ Error codes
 **1000:** Missing or invalid email.   
 **2000:** Missing API key or List ID. 
 
-Any other codes are API errors, and the same code that the MailChimp API returned. [Refer to MailChimp's documentation](http://apidocs.mailchimp.com/api/1.3/exceptions.field.php).
+Any other codes are API errors, and the same code that the MailChimp API returned. [Refer to MailChimp's documentation](http://developer.mailchimp.com/documentation/mailchimp/guides/error-glossary/).
 
 
 Ajax submitting
@@ -212,6 +214,13 @@ Example:
 
 Changelog
 ---
+### Version 1.0.0
+ - Refactored alot of code!
+ - The plugin is now using the MailChimp API 3.0.
+ - The plugin now has a service layer that other plugins can tap into.
+ - Subscribe results from multiple lists are now returned in a separate listResults array in the mailchimpSubscribe variable.
+ - Added Craft 2.5 plugin stuff.
+
 ### Version 0.6
  - Added new action CheckIsSubscribed to check if an email is already on list [Jeremy Daalder](https://github.com/bossanova808)
 
