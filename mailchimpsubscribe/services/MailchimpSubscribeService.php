@@ -16,7 +16,7 @@ use Mailchimp\Mailchimp;
 class MailchimpSubscribeService extends BaseApplicationComponent
 {
     var $settings = null;
-    
+
     /**
      * Subscribe to one or more Mailchimp lists
      *
@@ -58,18 +58,23 @@ class MailchimpSubscribeService extends BaseApplicationComponent
                         array_push($results, $this->_getMessage(200, $email, $vars, Craft::t("Already subscribed"), true));
 
                     } catch (\Exception $e) { // subscriber didn't exist, add him
+
+                        $postVars = array(
+                          'status' => $this->getSetting('mcsubDoubleOptIn') ? 'pending' : 'subscribed',
+                          'email_type' => $emailType,
+                          'email_address' => $email,
+                        );
+
+                        if (count($vars)>0) {
+                            $postVars['merge_fields'] = $vars;
+                        }
                         
                         try {
-                            $result = $mc->request('lists/' . $listId . '/members', [
-                              'status' => $this->getSetting('mcsubDoubleOptIn') ? 'pending' : 'subscribed',
-                              'email_type' => $emailType,
-                              'email_address' => $email,
-                              'merge_fields' => $vars
-                            ], 'POST');
-
+                            $result = $mc->request('lists/' . $listId . '/members', $postVars, 'POST');
                             array_push($results, $this->_getMessage(200, $email, $vars, Craft::t("Subscribed successfully"), true));
                         } catch (\Exception $e) { // an error occured
-                            array_push($results, $this->_getMessage($e->status, $email, $vars, Craft::t($e->title)));
+                            $msg = json_decode($e->getMessage());
+                            array_push($results, $this->_getMessage($msg->status, $email, $vars, Craft::t($msg->title)));
                         }
 
                     }
@@ -94,7 +99,7 @@ class MailchimpSubscribeService extends BaseApplicationComponent
 
     /**
      * Check if email exists in one or more lists.
-     * 
+     *
      * @param $email
      * @param $formListId
      * @return array|mixed
@@ -102,7 +107,7 @@ class MailchimpSubscribeService extends BaseApplicationComponent
     public function checkIfSubscribed($email, $formListId)
     {
         if ($email != '' && $this->validateEmail($email)) { // validate email
-            
+
             $listIdStr = $formListId != '' ? $formListId : $this->getSetting('mcsubListId');
 
             // check if we got an api key and a list id
@@ -140,7 +145,7 @@ class MailchimpSubscribeService extends BaseApplicationComponent
         } else {
             // error, invalid email
             return $this->_getMessage(1000, $email, $vars, Craft::t("Invalid email"));
-        }        
+        }
     }
 
     /**
