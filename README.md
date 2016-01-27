@@ -214,6 +214,11 @@ Example:
 
 Changelog
 ---
+### Version 1.0.1
+ - Fixed missing vendor library.
+ - Fixed bug where not supplying any merge vars would result in an error.
+ - Fixed error message.
+
 ### Version 1.0.0
  - Refactored alot of code!
  - The plugin is now using the MailChimp API 3.0.

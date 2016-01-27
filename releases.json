@@ -1,8 +1,18 @@
 [
     {
+        "version": "1.0.1",
+        "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
+        "date": "2016-01-27T11:26:00+02:00",
+        "notes": [
+            "[Fixed] Fixed missing vendor library.",
+            "[Fixed] Fixed bug where not supplying any merge vars would result in an error.",
+            "[Fixed] Fixed error message."
+        ]
+    },    
+    {
         "version": "1.0.0",
         "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
-        "date": "2010-01-22T23:50:00+02:00",
+        "date": "2016-01-22T23:50:00+02:00",
         "notes": [
             "[improved] Refactored alot of code!",
             "[improved] The plugin is now using the MailChimp API 3.0.",
