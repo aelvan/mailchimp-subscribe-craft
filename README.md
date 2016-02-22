@@ -115,20 +115,20 @@ For example, if we have the group "Interests" with the values "Branding" and "So
      <label for="checkbox-1"><input type="checkbox" id="checkbox-1" name="mcvars[group][4329]['Branding']" value="Branding" {% if (mailchimpSubscribe is defined) and (not mailchimpSubscribe.success) and (mailchimpSubscribe.values.vars.group[4329]['Branding'] is defined) %}checked{% endif %}>Branding</label>
      <label for="checkbox-2"><input type="checkbox" id="checkbox-2" name="mcvars[group][4329]['Social Media']" value="Social Media" {% if (mailchimpSubscribe is defined) and (not mailchimpSubscribe.success) and (mailchimpSubscribe.values.vars.group[4329]['Social Media'] is defined) %}checked{% endif %}>Social Media</label>
 
-The mailchimpSubscribe object
+The mailchimpSubscribe array
 ---
 When the plugin returns to the origin template, either if an error occured or successfully posting without a redirect, it will return 
-a mailchimpSubscribe object to the template. It contains the following variables:
+a mailchimpSubscribe array to the template. It contains the following variables:
  
-**mailchimpSubscribe.success (Boolean):** True or false, depending on if the Subscribe was completed successfully or not. 
+**mailchimpSubscribe['success'] (Boolean):** True or false, depending on if the Subscribe was completed successfully or not. 
 
-**mailchimpSubscribe.errorCode (Number):** If an error occured, an error code will also be supplied. See below for a list. 
+**mailchimpSubscribe['errorCode'] (Number):** If an error occured, an error code will also be supplied. See below for a list. 
 
-**mailchimpSubscribe.message (String):** A message describing the error. This probably shouldn't be displayed to end users, you should display your own depending on error code. 
+**mailchimpSubscribe['message'] (String):** A message describing the error. This probably shouldn't be displayed to end users, you should display your own depending on error code. 
 
-**mailchimpSubscribe.values (Object):** A structure containing the values that were submitted. For instance mailchimpSubscribe.values.email and mailchimpSubscribe.values.vars.FNAME.
+**mailchimpSubscribe['values'] (Array):** A structure containing the values that were submitted. For instance mailchimpSubscribe.values.email and mailchimpSubscribe.values.vars.FNAME.
 
-**If you submit multiple list ids are submitted, the mailchimpSubscribe object will contain a listResults array containing the results for each list. If an error occured for one of the lists, the base object will contain the error.**
+**If you submit multiple list ids are submitted, the mailchimpSubscribe array will contain a listResults array containing the results for each list. If an error occured for one of the lists, the base array will contain the error.**
 
 Checking if an email is already on a list
 ---
