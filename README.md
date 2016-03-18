@@ -1,6 +1,10 @@
 Introduction
 ---
-MailChimp Subscribe for [Craft](http://craftcms.com/) is a very simple plugin for subscribing to a MailChimp newsletter list.  It can also check if a user is subscribed to a list.
+MailChimp Subscribe for [Craft](http://craftcms.com/) is a simple plugin with three functions:
+
+1. Subscribe to a Mailchimp newsletter list
+2. Check if a user is subscribed to a list
+3. Load a mailchimp archive on to a page served over https
 
 
 Installation
@@ -175,6 +179,21 @@ And some jquery to do the actual check:
 
     });
 
+Loading a Mailchimp list archive on an page served by https
+---
+Mailchimp does not currently support serving list archives over https.
+
+Normally, you just generate your list archive code using the instructions at [Mailchimp Archive Generator Code](http://kb.mailchimp.com/campaigns/archives/add-a-custom-campaign-archive-to-a-website#Use-the-Archive-Generator-Code) , and then add the created code to your page.
+
+But if you use that generated code on an https page, you'll either get a security warning about insecure content, or the content will be blocked completely, depending on your browser and settings.
+
+You can get around this using a variable this plugin supplies.  You need to supply the values for `u` and `fid` from the code you generated above, and the third parameter is an optional limit paramater determinging how much of your archice is shown (default value is 10).
+
+Then simply add this to your template, subsituting your own values of course - and note you must use the `raw` filter or you'll see code rather than the rendered output:
+
+    {{ craft.mailchimpSubscribe.mailchimpArchive('64126cf7c572ab821c00b2ae6',466,1000)|raw }}
+
+If there is an issue retrieving your archive, you'll just get back a null string.
 
 Error codes
 ---
@@ -214,6 +233,10 @@ Example:
 
 Changelog
 ---
+
+### Version 1.0.2
+- Added support for retrieving Mailchimp list archvies on https pages
+
 ### Version 1.0.1
  - Fixed missing vendor library.
  - Fixed bug where not supplying any merge vars would result in an error.
