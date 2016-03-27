@@ -214,6 +214,10 @@ Example:
 
 Changelog
 ---
+### Version 1.0.2
+ - Added option to set interest groups (by [Sam Hibberd](https://github.com/samhibberd)).
+ - Fixed bug where not supplying any merge vars to checkIsSubscribed would result in an error (by [Sam Hibberd](https://github.com/samhibberd)).
+ 
 ### Version 1.0.1
  - Fixed missing vendor library.
  - Fixed bug where not supplying any merge vars would result in an error.
