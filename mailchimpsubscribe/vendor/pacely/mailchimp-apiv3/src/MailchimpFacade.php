@@ -14,6 +14,6 @@ class MailchimpFacade extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'Mailchimp';
+        return 'Mailchimp\Mailchimp';
     }
 }

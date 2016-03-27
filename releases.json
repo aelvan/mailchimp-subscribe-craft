@@ -1,33 +1,41 @@
 [
-        {
-        "version": "1.0.2",
-        "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
-        "date": "2016-03-16T17:09:18+00:00",
-        "notes": [
-            "[Added] Added option to set interest groups.",
-            "[Fixed] Fixed bug where not supplying any merge vars to checkIsSubscribed would result in an error."
-        ]
-    }, 
-    {
-        "version": "1.0.1",
-        "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
-        "date": "2016-01-27T11:26:00+02:00",
-        "notes": [
-            "[Fixed] Fixed missing vendor library.",
-            "[Fixed] Fixed bug where not supplying any merge vars would result in an error.",
-            "[Fixed] Fixed error message."
-        ]
-    },    
-    {
-        "version": "1.0.0",
-        "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
-        "date": "2016-01-22T23:50:00+02:00",
-        "notes": [
-            "[improved] Refactored alot of code!",
-            "[improved] The plugin is now using the MailChimp API 3.0.",
-            "[Added] The plugin now has a service layer that other plugins can tap into.",
-            "[Added] Subscribe results from multiple lists are now returned in a separate listResults array in the mailchimpSubscribe variable.",
-            "[Added] Added Craft 2.5 plugin stuff."
-        ]
-    }
+  {
+    "version": "1.0.3",
+    "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
+    "date": "2016-03-27T18:25:00+02:00",
+    "notes": [
+      "[Fixed] Updated vendor libraries."
+    ]
+  },
+  {
+    "version": "1.0.2",
+    "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
+    "date": "2016-03-16T17:09:18+00:00",
+    "notes": [
+      "[Added] Added option to set interest groups.",
+      "[Fixed] Fixed bug where not supplying any merge vars to checkIsSubscribed would result in an error."
+    ]
+  },
+  {
+    "version": "1.0.1",
+    "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
+    "date": "2016-01-27T11:26:00+02:00",
+    "notes": [
+      "[Fixed] Fixed missing vendor library.",
+      "[Fixed] Fixed bug where not supplying any merge vars would result in an error.",
+      "[Fixed] Fixed error message."
+    ]
+  },
+  {
+    "version": "1.0.0",
+    "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
+    "date": "2016-01-22T23:50:00+02:00",
+    "notes": [
+      "[improved] Refactored alot of code!",
+      "[improved] The plugin is now using the MailChimp API 3.0.",
+      "[Added] The plugin now has a service layer that other plugins can tap into.",
+      "[Added] Subscribe results from multiple lists are now returned in a separate listResults array in the mailchimpSubscribe variable.",
+      "[Added] Added Craft 2.5 plugin stuff."
+    ]
+  }
 ]
