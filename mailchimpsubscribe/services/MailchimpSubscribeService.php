@@ -49,6 +49,15 @@ class MailchimpSubscribeService extends BaseApplicationComponent
                     }
                 }
 
+                // convert interest groups if present
+                $interests = array();
+                if (isset($vars['interests']) && count($vars['interests'])) {
+                    foreach ($vars['interests'] as $interest) {
+                        $interests[$interest] = true;
+                    }
+                    unset($vars['interests']);
+                }
+
                 // loop over list id's and subscribe
                 $results = array();
                 foreach ($listIdArr as $listId) {
@@ -68,7 +77,11 @@ class MailchimpSubscribeService extends BaseApplicationComponent
                         if (count($vars)>0) {
                             $postVars['merge_fields'] = $vars;
                         }
-                        
+
+                        if (!empty($interests)) {
+                            $postVars['interests'] = $interests;
+                        }
+
                         try {
                             $result = $mc->request('lists/' . $listId . '/members', $postVars, 'POST');
                             array_push($results, $this->_getMessage(200, $email, $vars, Craft::t("Subscribed successfully"), true));
@@ -139,12 +152,12 @@ class MailchimpSubscribeService extends BaseApplicationComponent
 
             } else {
                 // error, no API key or list id
-                return $this->_getMessage(2000, $email, $vars, Craft::t("API Key or List ID not supplied. Check your settings."));
+                return $this->_getMessage(2000, $email, false, Craft::t("API Key or List ID not supplied. Check your settings."));
             }
 
         } else {
             // error, invalid email
-            return $this->_getMessage(1000, $email, $vars, Craft::t("Invalid email"));
+            return $this->_getMessage(1000, $email, false, Craft::t("Invalid email"));
         }
     }
 

@@ -1,4 +1,13 @@
 [
+        {
+        "version": "1.0.2",
+        "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
+        "date": "2016-03-16T17:09:18+00:00",
+        "notes": [
+            "[Added] Added option to set interest groups.",
+            "[Fixed] Fixed bug where not supplying any merge vars to checkIsSubscribed would result in an error."
+        ]
+    }, 
     {
         "version": "1.0.1",
         "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
