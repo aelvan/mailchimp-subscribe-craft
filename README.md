@@ -215,7 +215,7 @@ Example:
 
 Changelog
 ---
-### Version 1.0.3
+### Version 1.0.4
  - Fixed a small but critical bug that would happen when trying to subscribe and redirect.
 
 ### Version 1.0.3
