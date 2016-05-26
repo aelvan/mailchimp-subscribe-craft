@@ -2,6 +2,7 @@ Introduction
 ---
 MailChimp Subscribe for [Craft](http://craftcms.com/) is a very simple plugin for subscribing to a MailChimp newsletter list.  It can also check if a user is subscribed to a list.
 
+*MailChimp Subscribe requires PHP 5.5 or later.*
 
 Installation
 ---
@@ -214,6 +215,9 @@ Example:
 
 Changelog
 ---
+### Version 1.0.3
+ - Fixed a small but critical bug that would happen when trying to subscribe and redirect.
+
 ### Version 1.0.3
  - Updated vendor libraries.
 

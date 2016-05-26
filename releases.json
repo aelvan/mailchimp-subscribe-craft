@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.0.4",
+    "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
+    "date": "2016-05-26T13:09:00+02:00",
+    "notes": [
+      "[Fixed] Fixed a small but critical bug that would happen when trying to subscribe and redirect."
+    ]
+  },
+  {
     "version": "1.0.3",
     "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
     "date": "2016-03-27T18:25:00+02:00",

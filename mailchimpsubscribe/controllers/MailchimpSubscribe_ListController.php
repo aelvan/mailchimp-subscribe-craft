@@ -36,7 +36,7 @@ class MailchimpSubscribe_ListController extends BaseController
             return $this->returnJson($result);
         }
         
-        if ($redirect != '' && $result->success) {
+        if ($redirect != '' && $result['success']) {
             // if a redirect url was set in template form, redirect to this
             $this->redirectToPostedUrl();
         } else {
