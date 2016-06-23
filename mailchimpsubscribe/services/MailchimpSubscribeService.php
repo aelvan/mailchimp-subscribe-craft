@@ -103,6 +103,41 @@ class MailchimpSubscribeService extends BaseApplicationComponent
     }
 
     /**
+     * Return user object by email if it is present in one or more lists.
+     *
+     * @param $email
+     * @param $formListId
+     * @return array|mixed
+     */
+    private function getMemberByEmail($email, $formListId)
+    {
+        $member = false;
+
+        $listIdStr = $formListId != '' ? $formListId : $this->getSetting('mcsubListId');
+
+        // check if we got an api key and a list id
+        if ($this->getSetting('mcsubApikey') != '' && $listIdStr != '') {
+
+            // create a new api instance
+            $mc = new Mailchimp($this->getSetting('mcsubApikey'));
+
+            // split id string on | in case more than one list id is supplied
+            $listIdArr = explode("|", $listIdStr);
+
+            // loop over list id's and subscribe
+            foreach ($listIdArr as $listId) {
+                // check if member is subscribed
+                try {
+                    $member = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)));
+                } catch (\Exception $e) { // subscriber didn't exist
+                    $member = false;
+                }
+            }
+        }
+        return $member;
+    }
+
+    /**
      * Check if email exists in one or more lists.
      *
      * @param $email
@@ -118,22 +153,11 @@ class MailchimpSubscribeService extends BaseApplicationComponent
             // check if we got an api key and a list id
             if ($this->getSetting('mcsubApikey') != '' && $listIdStr != '') {
 
-                // create a new api instance, and subscribe
-                $mc = new Mailchimp($this->getSetting('mcsubApikey'));
-
-                // split id string on | in case more than one list id is supplied
-                $listIdArr = explode("|", $listIdStr);
-
-                // loop over list id's and subscribe
                 $results = array();
-                foreach ($listIdArr as $listId) {
-                    // check if email is subscribed
-                    try {
-                        $existsCheck = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)));
-                        array_push($results, $this->_getMessage(200, $email, array(), Craft::t("The email address passed exists on this list"), true));
-                    } catch (\Exception $e) { // subscriber didn't exist
-                        array_push($results, $this->_getMessage(1000, $email, array(), Craft::t("The email address passed does not exist on this list"), false));
-                    }
+                if($this->getMemberByEmail($email, $listIdStr)) {
+                    array_push($results, $this->_getMessage(200, $email, array(), Craft::t("The email address passed exists on this list"), true));
+                } else {
+                    array_push($results, $this->_getMessage(1000, $email, array(), Craft::t("The email address passed does not exist on this list"), false));
                 }
 
                 if (count($results) > 1) {
