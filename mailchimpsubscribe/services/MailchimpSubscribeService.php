@@ -53,35 +53,34 @@ class MailchimpSubscribeService extends BaseApplicationComponent
                 // loop over list id's and subscribe
                 $results = array();
                 foreach ($listIdArr as $listId) {
-                    // check if email is subscribed
+
+                    $member = $this->getMemberByEmail($email, $listId);
+                    if ($member) {
+                        // Merge interest groups
+                        $interests = array_merge($interests, $member['interests']);
+                    }
+                    // Subscribe
+                    $postVars = array(
+                      'status' => $this->getSetting('mcsubDoubleOptIn') ? 'pending' : 'subscribed',
+                      'email_type' => $emailType,
+                      'email_address' => $email,
+                      'status_if_new' => 'subscribed',
+                    );
+
+                    if (count($vars)>0) {
+                        $postVars['merge_fields'] = $vars;
+                    }
+
+                    if (!empty($interests)) {
+                        $postVars['interests'] = $interests;
+                    }
+
                     try {
-                        $existsCheck = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)));
-                        array_push($results, $this->_getMessage(200, $email, $vars, Craft::t("Already subscribed"), true));
-
-                    } catch (\Exception $e) { // subscriber didn't exist, add him
-
-                        $postVars = array(
-                          'status' => $this->getSetting('mcsubDoubleOptIn') ? 'pending' : 'subscribed',
-                          'email_type' => $emailType,
-                          'email_address' => $email,
-                        );
-
-                        if (count($vars)>0) {
-                            $postVars['merge_fields'] = $vars;
-                        }
-
-                        if (!empty($interests)) {
-                            $postVars['interests'] = $interests;
-                        }
-
-                        try {
-                            $result = $mc->request('lists/' . $listId . '/members', $postVars, 'POST');
-                            array_push($results, $this->_getMessage(200, $email, $vars, Craft::t("Subscribed successfully"), true));
-                        } catch (\Exception $e) { // an error occured
-                            $msg = json_decode($e->getMessage());
-                            array_push($results, $this->_getMessage($msg->status, $email, $vars, Craft::t($msg->title)));
-                        }
-
+                        $result = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)), $postVars, 'PUT');
+                        array_push($results, $this->_getMessage(200, $email, $vars, Craft::t("Subscribed successfully"), true));
+                    } catch (\Exception $e) { // an error occured
+                        $msg = json_decode($e->getMessage());
+                        array_push($results, $this->_getMessage($msg->status, $email, $vars, Craft::t($msg->title)));
                     }
                 }
 
