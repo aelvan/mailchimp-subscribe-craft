@@ -57,7 +57,7 @@ class MailchimpSubscribeService extends BaseApplicationComponent
                     $member = $this->getMemberByEmail($email, $listId);
                     if ($member) {
                         // Merge interest groups
-                        $interests = array_merge($member['interests'], $interests);
+                        $interests = array_merge((array) $member['interests'], $interests);
                     }
                     // Subscribe
                     $postVars = array(
