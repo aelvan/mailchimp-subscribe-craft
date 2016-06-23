@@ -41,14 +41,6 @@ class MailchimpSubscribeService extends BaseApplicationComponent
                 // split id string on | in case more than one list id is supplied
                 $listIdArr = explode("|", $listIdStr);
 
-                // convert groups to input format if present
-                if (isset($vars['group']) && count($vars['group'])) {
-                    $vars['GROUPINGS'] = array();
-                    foreach ($vars['group'] as $key => $vals) {
-                        $vars['GROUPINGS'][] = array('id' => $key, 'groups' => implode(',', $vals));
-                    }
-                }
-
                 // convert interest groups if present
                 $interests = array();
                 if (isset($vars['interests']) && count($vars['interests'])) {
