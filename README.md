@@ -1,6 +1,6 @@
 Introduction
 ---
-MailChimp Subscribe for [Craft](http://craftcms.com/) is a very simple plugin for subscribing to a MailChimp newsletter list.  It can also check if a user is subscribed to a list.
+MailChimp Subscribe for [Craft](http://craftcms.com/) is a plugin for subscribing to a MailChimp newsletter list.  
 
 *MailChimp Subscribe requires PHP 5.5 or later.*
 
@@ -45,7 +45,7 @@ Example Usage
 The following example shows the plugin in use:
 
       <form class="newsletter-form" action="" method="POST">
-        <input type="hidden" name="action" value="mailchimpSubscribe/list/Subscribe">
+        <input type="hidden" name="action" value="mailchimpSubscribe/list/subscribe">
         <input type="hidden" name="redirect" value="newsletter/receipt">
         
         {% if mailchimpSubscribe is defined %}
@@ -107,14 +107,8 @@ you just obmit the redirect parameter:
         <input type="submit" name="" value="Subscribe"/>
       </form>
 
-Any other list variables you have configured in MailChimp can be added with formfields with name values like mcvars[YOURMCVAR].
+Any other list variables you have configured in MailChimp can be added with formfields with name values like `mcvars[YOURMCVAR]`.
 
-Groups can be added by giving inputs a `name` attribute with the format `mcvars[group][X][Y]`, where `X` is the group's ID and `Y` is the name of a group's option. The easiest way to find your group's ID is via "Signup Forms > Embedded forms", and looking at the generated source code. [This](http://kb.mailchimp.com/lists/signup-forms/manage-groups-in-advanced-forms) page explains this process a little further. 
-
-For example, if we have the group "Interests" with the values "Branding" and "Social Media", our form would like this:
-
-     <label for="checkbox-1"><input type="checkbox" id="checkbox-1" name="mcvars[group][4329]['Branding']" value="Branding" {% if (mailchimpSubscribe is defined) and (not mailchimpSubscribe.success) and (mailchimpSubscribe.values.vars.group[4329]['Branding'] is defined) %}checked{% endif %}>Branding</label>
-     <label for="checkbox-2"><input type="checkbox" id="checkbox-2" name="mcvars[group][4329]['Social Media']" value="Social Media" {% if (mailchimpSubscribe is defined) and (not mailchimpSubscribe.success) and (mailchimpSubscribe.values.vars.group[4329]['Social Media'] is defined) %}checked{% endif %}>Social Media</label>
 
 The mailchimpSubscribe object
 ---
@@ -130,6 +124,106 @@ a mailchimpSubscribe object to the template. It contains the following variables
 **mailchimpSubscribe.values (Object):** A structure containing the values that were submitted. For instance mailchimpSubscribe.values.email and mailchimpSubscribe.values.vars.FNAME.
 
 **If you submit multiple list ids are submitted, the mailchimpSubscribe object will contain a listResults array containing the results for each list. If an error occured for one of the lists, the base object will contain the error.**
+
+
+Ajax submitting
+---
+If the form is submitted with Ajax, the plugin will return a JSON object with the same keys as the template object described above. Big up to [Jake Chapman](https://github.com/imjakechapman) for implementing this. :)
+
+Example:
+
+      $('form').on("submit", function(event) {
+        event.preventDefault();
+      
+        $.post('/', $(this).serialize())
+        .done( function(data) {
+      
+          if (!data.success)
+          {
+            // there was an error, do something with data
+            alert(data.message);
+          }
+          else
+          {
+            // Success
+            alert("WEEEEEEEEEE");
+          }
+      
+        });
+      });
+
+
+Groups
+---
+Groups can be added by adding a `interests` key to `mcvars`, as an array of interest ids that the user wants to add. You can get the
+interests connected to a list with the template variable `getListInterestGroups`. MailChimp lets you create different types of groups,
+checkboxes, radio buttons, dropdown, etc, but doesn't actually limit the add functionality to the groups depending on the type. You have
+to do this based on the group type. Example:
+   
+    <form class="newsletter-form" action="" method="POST">
+		<input type="hidden" name="action" value="mailchimpSubscribe/list/subscribe">
+
+		{% if mailchimpSubscribe is defined %}
+			{% if (not mailchimpSubscribe.success) and (mailchimpSubscribe.errorCode!='1000') %}
+				<p>An error occured. Please try again.</p>
+			{% endif %}
+
+			{% if mailchimpSubscribe.success %}
+				<p>Thank you for signing up!</p>
+			{% endif %}
+		{% endif %}
+
+		<div class="field-line">
+			<label>First name:</label>
+			<input type="text" name="mcvars[FNAME]" value="{% if (mailchimpSubscribe is defined) and (not mailchimpSubscribe.success) %}{{ mailchimpSubscribe.values.vars.FNAME }}{% endif %}"/>
+		</div>
+
+		<div class="field-line">
+			<label>Last name:</label>
+			<input type="text" name="mcvars[LNAME]" value="{% if (mailchimpSubscribe is defined) and (not mailchimpSubscribe.success) %}{{ mailchimpSubscribe.values.vars.LNAME }}{% endif %}"/>
+		</div>
+
+		<div class="field-line">
+			<label{% if (mailchimpSubscribe is defined) and (mailchimpSubscribe.errorCode=='1000') %} class="error"{% endif %}>Email:</label>
+			<input type="text" name="email" value="{% if (mailchimpSubscribe is defined) and (not mailchimpSubscribe.success) %}{{ mailchimpSubscribe.values.email }}{% endif %}"/>
+		</div>
+
+
+		{% set interestGroups = craft.mailchimpSubscribe.getListInterestGroups(craft.config.mcsubListId) %}
+
+		{% if not interestGroups.success %}
+			{{ interestGroups.message }}<br>
+		{% endif %}
+
+		{% if interestGroups.success and (interestGroups.groups | length > 0) %}
+			{% for group in interestGroups.groups %}
+				<strong>{{ group.title }}</strong>
+				<br>
+				{% if group.type=='checkboxes' %}
+					{% for interest in group.interests %}
+						<input type="checkbox" value="{{ interest.id }}" name="mcvars[interests][]">{{ interest.name }}<br>
+					{% endfor %}
+				{% endif %}
+
+				{% if group.type=='radio' %}
+					{% for interest in group.interests %}
+						<input type="radio" value="{{ interest.id }}" name="mcvars[interests][]">{{ interest.name }}<br>
+					{% endfor %}
+				{% endif %}
+
+				{% if group.type=='dropdown' %}
+					<select name="mcvars[interests][]">
+						{% for interest in group.interests %}
+							<option value="{{ interest.id }}">{{ interest.name }}</option>
+						{% endfor %}
+					</select>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+
+		<input type="submit" name="" value="Subscribe"/>
+	</form>   
+
 
 Checking if an email is already on a list
 ---
@@ -185,36 +279,14 @@ Error codes
 Any other codes are API errors, and the same code that the MailChimp API returned. [Refer to MailChimp's documentation](http://developer.mailchimp.com/documentation/mailchimp/guides/error-glossary/).
 
 
-Ajax submitting
----
-If the form is submitted with Ajax, the plugin will return a JSON object with the same keys as the template object described above. Big up to [Jake Chapman](https://github.com/imjakechapman) for implementing this. :)
-
-Example:
-
-      $('form').on("submit", function(event) {
-        event.preventDefault();
-      
-        $.post('/', $(this).serialize())
-        .done( function(data) {
-      
-          if (!data.success)
-          {
-            // there was an error, do something with data
-            alert(data.message);
-          }
-          else
-          {
-            // Success
-            alert("WEEEEEEEEEE");
-          }
-      
-        });
-      });
-
-
-
 Changelog
 ---
+### Version 1.1.0
+ - Support for groups was fixed to work with the new API (Thanks, [pabloroman](https://github.com/pabloroman)).
+ - New `getListInterestGroups` template variable that can be used to get available groups and interests from list.
+ - Removed old API library.
+ - Fixed documentation.
+
 ### Version 1.0.4
  - Fixed a small but critical bug that would happen when trying to subscribe and redirect.
 
