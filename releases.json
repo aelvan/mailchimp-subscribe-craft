@@ -1,5 +1,16 @@
 [
   {
+    "version": "1.1.0",
+    "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
+    "date": "2016-09-11T19:34:00+02:00",
+    "notes": [
+      "[Added] Support for groups was fixed to work with the new API",
+      "[Added] New getListInterestGroups template variable that can be used to get available groups and interests from list.",
+      "[Fixed] Removed old API library.",
+      "[Fixed] Fixed documentation"
+    ]
+  },
+  {
     "version": "1.0.4",
     "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
     "date": "2016-05-26T13:09:00+02:00",
