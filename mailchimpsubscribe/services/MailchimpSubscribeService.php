@@ -54,25 +54,26 @@ class MailchimpSubscribeService extends BaseApplicationComponent
                 $results = array();
                 foreach ($listIdArr as $listId) {
 
-                    $member = $this->getMemberByEmail($email, $listId);
-                    if ($member) {
-                        // Merge interest groups
-                        $interests = array_merge((array) $member['interests'], $interests);
+                    $member = $this->_getMemberByEmail($email, $listId);
+
+                    if ($member && isset($member['interests']) && !empty($interests)) {
+                        $interests = $this->_prepInterests($listId, $member, $interests);
                     }
-                    // Subscribe
+                    
+                    // subscribe
                     $postVars = array(
-                      'status' => $this->getSetting('mcsubDoubleOptIn') ? 'pending' : 'subscribed',
+                      'status_if_new' => $this->getSetting('mcsubDoubleOptIn') ? 'pending' : 'subscribed',
                       'email_type' => $emailType,
-                      'email_address' => $email,
-                      'status_if_new' => 'subscribed',
+                      'email_address' => $email
                     );
 
-                    if (count($vars)>0) {
+                    if (count($vars) > 0) {
                         $postVars['merge_fields'] = $vars;
                     }
 
                     if (!empty($interests)) {
                         $postVars['interests'] = $interests;
+                        $vars['interests'] = $interests;
                     }
 
                     try {
@@ -108,31 +109,17 @@ class MailchimpSubscribeService extends BaseApplicationComponent
      * @param $formListId
      * @return array|mixed
      */
-    private function getMemberByEmail($email, $formListId)
+    private function _getMemberByEmail($email, $listId)
     {
-        $member = false;
+        // create a new api instance
+        $mc = new Mailchimp($this->getSetting('mcsubApikey'));
 
-        $listIdStr = $formListId != '' ? $formListId : $this->getSetting('mcsubListId');
-
-        // check if we got an api key and a list id
-        if ($this->getSetting('mcsubApikey') != '' && $listIdStr != '') {
-
-            // create a new api instance
-            $mc = new Mailchimp($this->getSetting('mcsubApikey'));
-
-            // split id string on | in case more than one list id is supplied
-            $listIdArr = explode("|", $listIdStr);
-
-            // loop over list id's and subscribe
-            foreach ($listIdArr as $listId) {
-                // check if member is subscribed
-                try {
-                    $member = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)));
-                } catch (\Exception $e) { // subscriber didn't exist
-                    $member = false;
-                }
-            }
+        try {
+            $member = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)));
+        } catch (\Exception $e) { // subscriber didn't exist
+            $member = false;
         }
+        
         return $member;
     }
 
@@ -153,7 +140,7 @@ class MailchimpSubscribeService extends BaseApplicationComponent
             if ($this->getSetting('mcsubApikey') != '' && $listIdStr != '') {
 
                 $results = array();
-                if($this->getMemberByEmail($email, $listIdStr)) {
+                if ($this->_getMemberByEmail($email, $listIdStr)) {
                     array_push($results, $this->_getMessage(200, $email, array(), Craft::t("The email address passed exists on this list"), true));
                 } else {
                     array_push($results, $this->_getMessage(1000, $email, array(), Craft::t("The email address passed does not exist on this list"), false));
@@ -176,6 +163,122 @@ class MailchimpSubscribeService extends BaseApplicationComponent
         }
     }
 
+    /**
+     * Returns interest groups in list by list id
+     * 
+     * @param $listId
+     * @return array
+     */
+    public function getListInterestGroups($listId)
+    {
+        if ($listId == '') {
+            return array(
+              'success' => false,
+              'message' => Craft::t('No list ID given')
+            );
+        }
+
+        // check if we got an api key and a list id
+        if ($this->getSetting('mcsubApikey') != '') {
+
+            // create a new api instance
+            $mc = new Mailchimp($this->getSetting('mcsubApikey'));
+
+            try {
+                $result = $mc->request('lists/' . $listId . '/interest-categories');
+
+                $return = array();
+
+                foreach ($result['categories'] as $category) {
+                    $categoryData = array();
+                    $categoryData['title'] = $category->title;
+                    $categoryData['type'] = $category->type;
+                    $categoryData['interests'] = array();
+
+                    $interestsResult = $mc->request('lists/' . $listId . '/interest-categories/' . $category->id . '/interests');
+
+                    foreach ($interestsResult['interests'] as $interest) {
+                        $interestData = array();
+                        $interestData['id'] = $interest->id;
+                        $interestData['name'] = $interest->name;
+
+                        $categoryData['interests'][] = $interestData;
+                    }
+
+                    $return[] = $categoryData;
+                }
+
+
+                return array(
+                  'success' => true,
+                  'groups' => $return
+                );
+            } catch (\Exception $e) { // subscriber didn't exist
+                $msg = json_decode($e->getMessage());
+
+                return array(
+                  'success' => false,
+                  'message' => $msg->detail
+                );
+            }
+
+        } else {
+            return array(
+              'success' => false,
+              'message' => 'API Key not supplied. Check your settings.'
+            );
+        }
+    }
+
+    /**
+     * Removes existing interests in groups of type radio or dropdown, and merges all other interests
+     * 
+     * @param $listId
+     * @param $member
+     * @param $interests
+     * @return array
+     */
+    private function _prepInterests($listId, $member, $interests)
+    {
+        $interestGroupsResult = $this->getListInterestGroups($listId);
+        $memberInterests = (array)$member['interests'];
+        
+        // reset any id's in member object that belong to a select or radio group, if there is an id in interests array in that group.
+        foreach ($interestGroupsResult['groups'] as $group) {
+            if ($group['type'] == 'radio' || $group['type'] == 'dropdown') {
+                if ($this->_interestsHasIdInGroup($interests, $group['interests'])) {
+                    
+                    // reset all member interests for group interests
+                    foreach ($group['interests'] as $groupInterest) {
+                        $memberInterests[$groupInterest['id']] = false;
+                    }
+                } 
+            }
+        }
+
+        return array_merge($memberInterests, $interests);
+    }
+
+    /**
+     * Check if there is an id in the posted interests, in a groups interests
+     * 
+     * @param $interests
+     * @param $groupInterests
+     * @return bool
+     */
+    private function _interestsHasIdInGroup($interests, $groupInterests)
+    {
+        foreach($groupInterests as $groupInterest) {
+            foreach($interests as $interestId=>$interestVal) {
+                if ($interestId==$groupInterest['id']) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
     /**
      * Creates returned message object
      *
