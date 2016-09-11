@@ -281,7 +281,10 @@ Any other codes are API errors, and the same code that the MailChimp API returne
 
 Changelog
 ---
-### Version 1.1.0
+### Version 1.1.1
+ - Added (non-existing) schema version
+ 
+ ### Version 1.1.0
  - Support for groups was fixed to work with the new API (Thanks, [pabloroman](https://github.com/pabloroman)).
  - New `getListInterestGroups` template variable that can be used to get available groups and interests from list.
  - Removed old API library.
