@@ -29,8 +29,9 @@ class MailchimpSubscribe_ListController extends BaseController
         $emailType = craft()->request->getParam('emailtype', 'html');
         $vars = craft()->request->getParam('mcvars', null);
         $redirect = craft()->request->getParam('redirect', '');
+        $language = craft()->request->getParam('language', null);
 
-        $result = craft()->mailchimpSubscribe->subscribe($email, $formListId, $emailType, $vars);
+        $result = craft()->mailchimpSubscribe->subscribe($email, $formListId, $emailType, $vars, $language);
         
         if (craft()->request->isAjaxRequest()) {
             return $this->returnJson($result);
