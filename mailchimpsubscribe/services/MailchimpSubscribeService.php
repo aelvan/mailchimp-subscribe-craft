@@ -24,9 +24,10 @@ class MailchimpSubscribeService extends BaseApplicationComponent
      * @param $formListId
      * @param string $emailType
      * @param string $vars
+     * @param string $language
      * @return array
      */
-    public function subscribe($email, $formListId, $emailType = 'html', $vars = '')
+    public function subscribe($email, $formListId, $emailType = 'html', $vars = '', $language = null)
     {
         if ($email != '' && $this->validateEmail($email)) { // validate email
 
@@ -74,6 +75,10 @@ class MailchimpSubscribeService extends BaseApplicationComponent
                     if (!empty($interests)) {
                         $postVars['interests'] = $interests;
                         $vars['interests'] = $interests;
+                    }
+
+                    if (!is_null($language)) {
+                        $postVars['language'] = $language;
                     }
 
                     try {
