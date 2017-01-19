@@ -14,7 +14,7 @@ namespace Craft;
 
 class MailchimpSubscribePlugin extends BasePlugin
 {
-    protected $_version = '1.1.2',
+    protected $_version = '1.1.3',
       $_schemaVersion = '1.0.0',
       $_name = 'Mailchimp Subscribe',
       $_url = 'https://github.com/aelvan/mailchimp-subscribe-craft',

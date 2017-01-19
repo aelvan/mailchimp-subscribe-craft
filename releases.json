@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.1.3",
+    "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
+    "date": "2017-01-19T23:46:00+02:00",
+    "notes": [
+      "[Added] Added support for 'language' field (by @dredumont)"
+    ]
+  },
+  {
     "version": "1.1.2",
     "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
     "date": "2016-12-20T21:32:00+02:00",

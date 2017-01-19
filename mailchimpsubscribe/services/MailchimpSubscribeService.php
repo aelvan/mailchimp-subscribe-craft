@@ -27,7 +27,7 @@ class MailchimpSubscribeService extends BaseApplicationComponent
      * @param string $language
      * @return array
      */
-    public function subscribe($email, $formListId, $emailType = 'html', $vars = '', $language = null)
+    public function subscribe($email, $formListId, $emailType = 'html', $vars = null, $language = null)
     {
         if ($email != '' && $this->validateEmail($email)) { // validate email
 
