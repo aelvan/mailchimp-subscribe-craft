@@ -110,20 +110,20 @@ you just obmit the redirect parameter:
 Any other list variables you have configured in MailChimp can be added with formfields with name values like `mcvars[YOURMCVAR]`.
 
 
-The mailchimpSubscribe object
+The mailchimpSubscribe array
 ---
 When the plugin returns to the origin template, either if an error occured or successfully posting without a redirect, it will return 
-a mailchimpSubscribe object to the template. It contains the following variables:
+a mailchimpSubscribe array to the template. It contains the following variables:
  
-**mailchimpSubscribe.success (Boolean):** True or false, depending on if the Subscribe was completed successfully or not. 
+**mailchimpSubscribe['success'] (Boolean):** True or false, depending on if the Subscribe was completed successfully or not. 
 
-**mailchimpSubscribe.errorCode (Number):** If an error occured, an error code will also be supplied. See below for a list. 
+**mailchimpSubscribe['errorCode'] (Number):** If an error occured, an error code will also be supplied. See below for a list. 
 
-**mailchimpSubscribe.message (String):** A message describing the error. This probably shouldn't be displayed to end users, you should display your own depending on error code. 
+**mailchimpSubscribe['message'] (String):** A message describing the error. This probably shouldn't be displayed to end users, you should display your own depending on error code. 
 
-**mailchimpSubscribe.values (Object):** A structure containing the values that were submitted. For instance mailchimpSubscribe.values.email and mailchimpSubscribe.values.vars.FNAME.
+**mailchimpSubscribe['values'] (Array):** A structure containing the values that were submitted. For instance mailchimpSubscribe.values.email and mailchimpSubscribe.values.vars.FNAME.
 
-**If you submit multiple list ids are submitted, the mailchimpSubscribe object will contain a listResults array containing the results for each list. If an error occured for one of the lists, the base object will contain the error.**
+**If you submit multiple list ids are submitted, the mailchimpSubscribe array will contain a listResults array containing the results for each list. If an error occured for one of the lists, the base array will contain the error.**
 
 
 Ajax submitting
