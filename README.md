@@ -77,6 +77,7 @@ successfully signing up to MailChimp. If you want to display the receipt message
 you just obmit the redirect parameter: 
 
       <form class="newsletter-form" action="" method="POST">
+		{{ getCsrfInput() }}
         <input type="hidden" name="action" value="mailchimpSubscribe/list/Subscribe">
         
         {% if mailchimpSubscribe is defined %}
@@ -161,6 +162,7 @@ checkboxes, radio buttons, dropdown, etc, but doesn't actually limit the add fun
 to do this based on the group type. Example:
    
     <form class="newsletter-form" action="" method="POST">
+		{{ getCsrfInput() }}
 		<input type="hidden" name="action" value="mailchimpSubscribe/list/subscribe">
 
 		{% if mailchimpSubscribe is defined %}
