@@ -1,35 +1,58 @@
-Introduction
----
+Mailchimp Subscribe plugin for Craft CMS 3.x
+===
+
 MailChimp Subscribe for [Craft](http://craftcms.com/) is a plugin for subscribing to a MailChimp newsletter list.  
 
-*MailChimp Subscribe requires PHP 5.5 or later.*
+Requirements
+---
+This plugin requires Craft CMS 3.0.0-RC1 or later.
+
+Craft 3 update notes
+---
+The following things has changed from Craft 2 to Craft 3:
+
+- The plugin no longer is configurable from the control panel, you need to use a config file (see [Configuration](#configuration)).
+- The plugin handle used in the action input has changed from `mailchimpSubscribe` to `mailchimp-subscribe` (see [Example Usage](#example-usage)). 
+- The redirect url now has to be hashed in the redirect input (see [Example Usage](#example-usage)). 
 
 Installation
 ---
-1. Download and extract the contents of the zip. Put the `mailchimpsubscribe` folder to your Craft plugin folder.   
-2. Enable the MailChimp Subscribe plugin in Craft (Settings > Plugins).  
-3. Configure the plugin either in the plugin settings page in the control panel, or configure it via the general config file (see "Configuration" below).  
-4. Add a form for signing up to your templates (see "Example Usage" below).  
-5. Eat a banana.
+To install the plugin, follow these instructions.
 
+1. Open your terminal and go to your Craft project:
+
+        cd /path/to/project
+
+2. Then tell Composer to load the plugin:
+
+        composer require aelvan/mailchimp-subscribe
+
+3. In the Control Panel, go to Settings → Plugins and click the “Install” button for Mailchimp Subscribe.
+
+4. Eat a banana.
 
 Configuration
 ---
-To use the plugin you need to create an API key from the MailChimp control panel, and create a list (or use one that you already have). 
+To use the plugin you need to create an API key from the MailChimp control panel, and create a list 
+(or use one that you already have). 
 
-You can configure MailChimp Subscribe either through the plugins settings in the control panel, or 
-by adding the settings to the general config file (usually found in /craft/config/general.php).
-Configuring it in the settings file is more flexible, since you can set up the config file to have
-different settings depending on the environment.
+You configure MailChimp Subscribe by creating a new config file named `mailchimp-subscribe.php` in your config 
+folder (usually `/config`), and add the following the config parameters found in the plugin's `config.php` file.
+
+### Example config file
+
+    <?php
+     
+    return [
+        'apiKey' => 'xxxxxxxxxxxxxxxxxxx-us2',
+        'listId' => '7fe6ec08ca',
+        'doubleOptIn' => true,
+    ];
 
 
-### Example
-
-    'mcsubApikey' => 'xxxxxxxxxxxxxxxxxxxxx-us2',
-    'mcsubListId' => '2fd6ec09cf',
-    'mcsubDoubleOptIn' => false
-
-If you have multiple lists you want users to subscribe to, each form can have a hidden field with a name of "lid" and the "value" as your list id. The plugin will use this list id on form submit. 
+If you have multiple lists you want users to subscribe to, each form can have a hidden field with a 
+name of "lid" and the "value" as your list id. The plugin will then use this list id instead of the
+one in the configuration. 
 
 ### Example
 	<input type="hidden" name="lid" value="2fd6ec09cf">
@@ -45,8 +68,9 @@ Example Usage
 The following example shows the plugin in use:
 
       <form class="newsletter-form" action="" method="POST">
-        <input type="hidden" name="action" value="mailchimpSubscribe/list/subscribe">
-        <input type="hidden" name="redirect" value="newsletter/receipt">
+        {{ getCsrfInput() }}
+        <input type="hidden" name="action" value="mailchimp-subscribe/list/subscribe">
+        <input type="hidden" name="redirect" value="{{ newsletter/receipt | hash }}">
         
         {% if mailchimpSubscribe is defined %}
           {% if (not mailchimpSubscribe.success) and (mailchimpSubscribe.errorCode!='1000') %}
@@ -77,7 +101,8 @@ successfully signing up to MailChimp. If you want to display the receipt message
 you just obmit the redirect parameter: 
 
       <form class="newsletter-form" action="" method="POST">
-        <input type="hidden" name="action" value="mailchimpSubscribe/list/Subscribe">
+        {{ getCsrfInput() }}
+        <input type="hidden" name="action" value="mailchimp-subscribe/list/Subscribe">
         
         {% if mailchimpSubscribe is defined %}
           {% if (not mailchimpSubscribe.success) and (mailchimpSubscribe.errorCode!='1000') %}
@@ -128,40 +153,39 @@ a mailchimpSubscribe object to the template. It contains the following variables
 
 Ajax submitting
 ---
-If the form is submitted with Ajax, the plugin will return a JSON object with the same keys as the template object described above. Big up to [Jake Chapman](https://github.com/imjakechapman) for implementing this. :)
+If the form is submitted with Ajax, the plugin will return a JSON object with the same keys as the template object described 
+above. Big up to [Jake Chapman](https://github.com/imjakechapman) for implementing this. :)
 
 Example:
 
-      $('form').on("submit", function(event) {
+    $('form').on("submit", function(event) {
         event.preventDefault();
       
-        $.post('/', $(this).serialize())
-        .done( function(data) {
-      
-          if (!data.success)
-          {
-            // there was an error, do something with data
-            alert(data.message);
-          }
-          else
-          {
-            // Success
-            alert("WEEEEEEEEEE");
-          }
-      
+        $.post('/', $(this).serialize()).done( function(data) {
+            if (!data.success)
+            {
+              // there was an error, do something with data
+              alert(data.message);
+            }
+            else
+            {
+              // Success
+              alert("WEEEEEEEEEE");
+            }
         });
-      });
+    });
 
 
 Groups
 ---
-Groups can be added by adding a `interests` key to `mcvars`, as an array of interest ids that the user wants to add. You can get the
-interests connected to a list with the template variable `getListInterestGroups`. MailChimp lets you create different types of groups,
-checkboxes, radio buttons, dropdown, etc, but doesn't actually limit the add functionality to the groups depending on the type. You have
-to do this based on the group type. Example:
+Groups can be added by adding a `interests` key to `mcvars`, as an array of interest ids that the user wants to add. 
+You can get the interests connected to a list with the template variable `getListInterestGroups`. MailChimp lets you 
+create different types of groups, checkboxes, radio buttons, dropdown, etc, but doesn't actually limit the add 
+functionality to the groups depending on the type. You have to do this based on the group type. Example:
    
     <form class="newsletter-form" action="" method="POST">
-		<input type="hidden" name="action" value="mailchimpSubscribe/list/subscribe">
+		{{ getCsrfInput() }}
+		<input type="hidden" name="action" value="mailchimp-subscribe/list/subscribe">
 
 		{% if mailchimpSubscribe is defined %}
 			{% if (not mailchimpSubscribe.success) and (mailchimpSubscribe.errorCode!='1000') %}
@@ -227,9 +251,21 @@ to do this based on the group type. Example:
 
 Checking if an email is already on a list
 ---
-Sometimes you might want to know if a user is already on an email list - for example during a cart checkout.  It's nice not to bother your existing customers with repeated requests to subscribe to your mailing list, so if this check shows they're already subscribed, you can hide your subscribe form.
+Sometimes you might want to know if a user is already on an email list - for example during a cart checkout.  
+It's nice not to bother your existing customers with repeated requests to subscribe to your mailing list, 
+so if this check shows they're already subscribed, you can hide your subscribe form.
 
-Here's an example that should get you started implementing such behaviour:
+You can either use the template variable `checkIfSubscribed` like this:
+
+    {% set checkResponse = craft.mailchimpSubscribe.checkIfSubscribed('email@domain.com', 'mylistid') %}
+    
+    {% if checkResponse.success %}
+        Email is on list!
+    {% else %}
+        Email is NOT on list!
+    {% endif %}
+
+Or, you can use the controller action. Here's an example that should get you started implementing such behaviour:
 
       <p>Check if a user is on our mailing list</p>
 
@@ -281,4 +317,4 @@ Any other codes are API errors, and the same code that the MailChimp API returne
 
 Changelog
 ---
-See [releases.json](https://raw.githubusercontent.com/aelvan/mailchimp-subscribe-craft/master/releases.json).
+See [CHANGELOG.json](https://raw.githubusercontent.com/aelvan/mailchimp-subscribe-craft/craft3/CHANGELOG.json).

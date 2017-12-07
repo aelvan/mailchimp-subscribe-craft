@@ -1,0 +1,50 @@
+{
+    "name": "aelvan/mailchimp-subscribe",
+    "description": "Simple Craft plugin for subscribing to a MailChimp list.",
+    "type": "craft-plugin",
+    "version": "2.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "mailchimp"
+    ],
+    "support": {
+        "docs": "https://github.com/aelvan/mailchimp-subscribe-craft/blob/craft3/README.md",
+        "issues": "https://github.com/aelvan/mailchimp-subscribe-craft/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "André Elvan",
+            "homepage": "https://www.vaersaagod.no"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0-RC1",
+        "pacely/mailchimp-apiv3": "dev-master"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+          "aelvan\\mailchimpsubscribe\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Mailchimp Subscribe",
+        "handle": "mailchimp-subscribe",
+        "schemaVersion": "2.0.0",
+        "hasCpSettings": false,
+        "hasCpSection": false,
+        "changelogUrl": "https://raw.githubusercontent.com/aelvan/mailchimp-subscribe/master/CHANGELOG.md",
+        "components": {
+        },
+        "class": "aelvan\\mailchimpsubscribe\\MailchimpSubscribe"
+    }
+}
