@@ -18,7 +18,6 @@ use Craft;
 use craft\base\Plugin;
 use craft\web\twig\variables\CraftVariable;
 
-use JsonSchema\Exception\InvalidConfigException;
 use yii\base\Event;
 
 /**
@@ -52,13 +51,6 @@ class MailchimpSubscribe extends Plugin
         self::$plugin = $this;
         
         $this->set('mailchimpSubscribe', '\aelvan\mailchimpsubscribe\services\MailchimpSubscribeService');
-
-        /*
-         $this->setComponents([
-            'component-id' => Component::class,
-            // ...
-        ]);
-        */
         
         Event::on(
             CraftVariable::class,
