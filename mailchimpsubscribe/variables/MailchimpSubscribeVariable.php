@@ -9,5 +9,9 @@ class MailchimpSubscribeVariable
         return craft()->mailchimpSubscribe->getListInterestGroups($listId);
     }
 
-    
+    public function checkIfSubscribed($email, $formListId)
+    {
+        return craft()->mailchimpSubscribe->checkIfSubscribed($email, $formListId);
+    }
+
 }
