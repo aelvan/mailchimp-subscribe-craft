@@ -37,7 +37,33 @@ class MailchimpSubscribe_ListController extends BaseController
             return $this->returnJson($result);
         }
         
-        if ($redirect != '' && $result['success']) {
+        if ($redirect !== '' && $result['success']) {
+            // if a redirect url was set in template form, redirect to this
+            $this->redirectToPostedUrl();
+        } else {
+            craft()->urlManager->setRouteVariables(array('mailchimpSubscribe' => $result));
+        }
+    }
+    
+    /**
+     * Unsubscribe controller action
+     * 
+     * @return null
+     */
+    public function actionUnsubscribe()
+    {
+        // get post variables
+        $email = craft()->request->getParam('email', '');
+        $formListId = craft()->request->getParam('lid', '');
+        $redirect = craft()->request->getParam('redirect', '');
+
+        $result = craft()->mailchimpSubscribe->unsubscribe($email, $formListId);
+        
+        if (craft()->request->isAjaxRequest()) {
+            return $this->returnJson($result);
+        }
+        
+        if ($redirect !== '' && $result['success']) {
             // if a redirect url was set in template form, redirect to this
             $this->redirectToPostedUrl();
         } else {
