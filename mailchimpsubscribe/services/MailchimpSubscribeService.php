@@ -145,7 +145,9 @@ class MailchimpSubscribeService extends BaseApplicationComponent
             if ($this->getSetting('mcsubApikey') != '' && $listIdStr != '') {
 
                 $results = array();
-                if ($this->_getMemberByEmail($email, $listIdStr)) {
+                $member = $this->_getMemberByEmail($email, $listIdStr);
+                
+                if ($member && $member['status'] !== 'unsubscribed') {
                     array_push($results, $this->_getMessage(200, $email, array(), Craft::t("The email address passed exists on this list"), true));
                 } else {
                     array_push($results, $this->_getMessage(1000, $email, array(), Craft::t("The email address passed does not exist on this list"), false));
