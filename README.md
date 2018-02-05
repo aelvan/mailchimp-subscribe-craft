@@ -232,7 +232,17 @@ Checking if an email is already on a list
 ---
 Sometimes you might want to know if a user is already on an email list - for example during a cart checkout.  It's nice not to bother your existing customers with repeated requests to subscribe to your mailing list, so if this check shows they're already subscribed, you can hide your subscribe form.
 
-Here's an example that should get you started implementing such behaviour:
+You can either use the template variable `checkIfSubscribed` like this:
+
+    {% set checkResponse = craft.mailchimpSubscribe.checkIfSubscribed('email@domain.com', 'mylistid') %}
+    
+    {% if checkResponse.success %}
+        Email is on list!
+    {% else %}
+        Email is NOT on list!
+    {% endif %}
+
+Or, you can use the controller action. Here's an example that should get you started implementing such behaviour:
 
       <p>Check if a user is on our mailing list</p>
 
