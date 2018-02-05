@@ -15,7 +15,8 @@ Installation
 
 Configuration
 ---
-To use the plugin you need to create an API key from the MailChimp control panel, and create a list (or use one that you already have). 
+To use the plugin you need to create an API key from the MailChimp control panel, and create a list 
+(or use one that you already have). 
 
 You can configure MailChimp Subscribe either through the plugins settings in the control panel, or 
 by adding the settings to the general config file (usually found in /craft/config/general.php).
@@ -29,7 +30,8 @@ different settings depending on the environment.
     'mcsubListId' => '2fd6ec09cf',
     'mcsubDoubleOptIn' => false
 
-If you have multiple lists you want users to subscribe to, each form can have a hidden field with a name of "lid" and the "value" as your list id. The plugin will use this list id on form submit. 
+If you have multiple lists you want users to subscribe to, each form can have a hidden field with a name 
+of "lid" and the "value" as your list id. The plugin will use this list id on form submit. 
 
 ### Example
 	<input type="hidden" name="lid" value="2fd6ec09cf">
@@ -111,6 +113,27 @@ you just obmit the redirect parameter:
 
 Any other list variables you have configured in MailChimp can be added with formfields with name values like `mcvars[YOURMCVAR]`.
 
+You can also unsubscribe an email from a list by using the `mailchimpSubscribe/list/unsubscribe` controller action. Example:
+
+      <form class="newsletter-form" action="" method="POST">
+      	{{ getCsrfInput() }}
+        <input type="hidden" name="action" value="mailchimpSubscribe/list/unsubscribe">
+        <input type="hidden" name="redirect" value="newsletter/receipt">
+        
+        {% if mailchimpSubscribe is defined %}
+          {% if (not mailchimpSubscribe.success) and (mailchimpSubscribe.errorCode!='1000') %}
+            <p>An error occured. Please try again.</p>
+          {% endif %}
+        {% endif %}
+        
+        <div class="field-line">
+          <label{% if (mailchimpSubscribe is defined) and (mailchimpSubscribe.errorCode=='1000') %} class="error"{% endif %}>Email:</label>
+          <input type="text" name="email" value="{% if (mailchimpSubscribe is defined) and (not mailchimpSubscribe.success) %}{{ mailchimpSubscribe.values.email }}{% endif %}"/>
+        </div>
+        
+        <input type="submit" name="" value="Unubscribe"/>
+      </form>
+      
 
 The mailchimpSubscribe object
 ---
@@ -226,7 +249,6 @@ to do this based on the group type. Example:
 
 		<input type="submit" name="" value="Subscribe"/>
 	</form>   
-
 
 Checking if an email is already on a list
 ---
