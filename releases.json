@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.1.6",
+    "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
+    "date": "2018-02-18T12:41:00+02:00",
+    "notes": [
+      "[Fixed] Fixed an error that would occur if trying to unsubscribe a user that's not on the list."
+    ]
+  },
+  {
     "version": "1.1.5",
     "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
     "date": "2018-02-05T17:49:00+02:00",

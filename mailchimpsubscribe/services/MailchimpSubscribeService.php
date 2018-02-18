@@ -155,11 +155,15 @@ class MailchimpSubscribeService extends BaseApplicationComponent
                     }
                 }
 
+                if (count($results) === 0) {
+                    return null;
+                } 
+                
                 if (count($results) > 1) {
                     return $this->_parseMultipleListsResult($results);
-                } else {
-                    return $results[0];
                 }
+                
+                return $results[0];
 
             } else {
                 // error, no API key or list id
