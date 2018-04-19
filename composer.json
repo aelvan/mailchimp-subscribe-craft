@@ -22,8 +22,8 @@
         }
     ],
     "require": {
-        "craftcms/cms": "^3.0.0-RC1",
-        "pacely/mailchimp-apiv3": "dev-master"
+        "craftcms/cms": "^3.0.0",
+        "pacely/mailchimp-apiv3": "^1.0"
     },
     "repositories": [
         {
