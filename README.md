@@ -102,7 +102,7 @@ you just obmit the redirect parameter:
 
       <form class="newsletter-form" action="" method="POST">
         {{ getCsrfInput() }}
-        <input type="hidden" name="action" value="mailchimp-subscribe/list/Subscribe">
+        <input type="hidden" name="action" value="mailchimp-subscribe/list/subscribe">
         
         {% if mailchimpSubscribe is defined %}
           {% if (not mailchimpSubscribe.success) and (mailchimpSubscribe.errorCode!='1000') %}
