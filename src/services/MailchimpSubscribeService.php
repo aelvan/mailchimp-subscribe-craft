@@ -81,7 +81,7 @@ class MailchimpSubscribeService extends Component
                 'email_address' => $email
             ];
 
-            if (\count($vars) > 0) {
+            if (isset($vars) && \count($vars) > 0) {
                 $postVars['merge_fields'] = $vars;
             }
 
