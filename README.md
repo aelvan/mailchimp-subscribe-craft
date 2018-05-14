@@ -161,18 +161,13 @@ Example:
     $('form').on("submit", function(event) {
         event.preventDefault();
       
-        $.post('/', $(this).serialize()).done( function(data) {
-            if (!data.success)
-            {
+        $.ajax({url: '/', type: "POST", data: $(this).serialize(), dataType:"json", success: function (data) {
+            if (!data.success) {
               // there was an error, do something with data
-              alert(data.message);
-            }
-            else
-            {
+            } else {
               // Success
-              alert("WEEEEEEEEEE");
             }
-        });
+        }})
     });
 
 
