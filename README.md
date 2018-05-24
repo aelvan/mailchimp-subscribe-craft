@@ -68,7 +68,7 @@ Example Usage
 The following example shows the plugin in use:
 
       <form class="newsletter-form" action="" method="POST">
-        {{ getCsrfInput() }}
+        {{ csrfInput() }}
         <input type="hidden" name="action" value="mailchimp-subscribe/list/subscribe">
         <input type="hidden" name="redirect" value="{{ newsletter/receipt | hash }}">
         
@@ -101,7 +101,7 @@ successfully signing up to MailChimp. If you want to display the receipt message
 you just obmit the redirect parameter: 
 
       <form class="newsletter-form" action="" method="POST">
-        {{ getCsrfInput() }}
+        {{ csrfInput() }}
         <input type="hidden" name="action" value="mailchimp-subscribe/list/subscribe">
         
         {% if mailchimpSubscribe is defined %}
