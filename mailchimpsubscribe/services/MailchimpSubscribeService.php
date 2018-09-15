@@ -241,16 +241,17 @@ class MailchimpSubscribeService extends BaseApplicationComponent
 
     /**
      * Returns interest groups in list by list id
-     * 
+     *
      * @param $listId
+     * @param int $count
      * @return array
      */
-    public function getListInterestGroups($listId)
+    public function getListInterestGroups($listId, $count = 10)
     {
         if ($listId == '') {
             return array(
-              'success' => false,
-              'message' => Craft::t('No list ID given')
+                'success' => false,
+                'message' => Craft::t('No list ID given')
             );
         }
 
@@ -271,7 +272,7 @@ class MailchimpSubscribeService extends BaseApplicationComponent
                     $categoryData['type'] = $category->type;
                     $categoryData['interests'] = array();
 
-                    $interestsResult = $mc->request('lists/' . $listId . '/interest-categories/' . $category->id . '/interests');
+                    $interestsResult = $mc->request('lists/' . $listId . '/interest-categories/' . $category->id . '/interests/?count=' . intval($count) . '&offset=0');
 
                     foreach ($interestsResult['interests'] as $interest) {
                         $interestData = array();
@@ -286,22 +287,22 @@ class MailchimpSubscribeService extends BaseApplicationComponent
 
 
                 return array(
-                  'success' => true,
-                  'groups' => $return
+                    'success' => true,
+                    'groups' => $return
                 );
             } catch (\Exception $e) { // subscriber didn't exist
                 $msg = json_decode($e->getMessage());
 
                 return array(
-                  'success' => false,
-                  'message' => $msg->detail
+                    'success' => false,
+                    'message' => $msg->detail
                 );
             }
 
         } else {
             return array(
-              'success' => false,
-              'message' => 'API Key not supplied. Check your settings.'
+                'success' => false,
+                'message' => 'API Key not supplied. Check your settings.'
             );
         }
     }
