@@ -68,7 +68,7 @@ Example Usage
 The following example shows the plugin in use:
 
       <form class="newsletter-form" action="" method="POST">
-        {{ getCsrfInput() }}
+        {{ csrfInput() }}
         <input type="hidden" name="action" value="mailchimp-subscribe/list/subscribe">
         <input type="hidden" name="redirect" value="{{ newsletter/receipt | hash }}">
         
@@ -101,7 +101,7 @@ successfully signing up to MailChimp. If you want to display the receipt message
 you just obmit the redirect parameter: 
 
       <form class="newsletter-form" action="" method="POST">
-        {{ getCsrfInput() }}
+        {{ csrfInput() }}
         <input type="hidden" name="action" value="mailchimp-subscribe/list/subscribe">
         
         {% if mailchimpSubscribe is defined %}
@@ -179,7 +179,7 @@ create different types of groups, checkboxes, radio buttons, dropdown, etc, but 
 functionality to the groups depending on the type. You have to do this based on the group type. Example:
    
     <form class="newsletter-form" action="" method="POST">
-		{{ getCsrfInput() }}
+		{{ csrfInput() }}
 		<input type="hidden" name="action" value="mailchimp-subscribe/list/subscribe">
 
 		{% if mailchimpSubscribe is defined %}
@@ -265,7 +265,7 @@ Or, you can use the controller action. Here's an example that should get you sta
       <p>Check if a user is on our mailing list</p>
 
       <form method="POST" id="testMCOnList">
-          {{ getCsrfInput() }}
+          {{ csrfInput() }}
           <input type="hidden" name="action" value="mailchimpSubscribe/list/CheckIfSubscribed">
 
           Enter email to check: <input type="text" id="email" size="40" name="email" >
