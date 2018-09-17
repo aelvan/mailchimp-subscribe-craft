@@ -1,5 +1,5 @@
 {
     "require": {
-        "pacely/mailchimp-apiv3": "dev-master"
+        "pacely/mailchimp-apiv3": "^1.0"
     }
 }

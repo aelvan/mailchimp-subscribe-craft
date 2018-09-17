@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.1.7",
+    "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
+    "date": "2018-09-15T18:08:00+02:00",
+    "notes": [
+      "[Added] Makes it possible to request more than 10 list interests.",
+      "[Added] Updated composer packages."
+    ]
+  },
+  {
     "version": "1.1.6",
     "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
     "date": "2018-02-18T12:41:00+02:00",
