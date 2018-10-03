@@ -70,7 +70,7 @@ The following example shows the plugin in use:
       <form class="newsletter-form" action="" method="POST">
         {{ csrfInput() }}
         <input type="hidden" name="action" value="mailchimp-subscribe/list/subscribe">
-        <input type="hidden" name="redirect" value="{{ newsletter/receipt | hash }}">
+        <input type="hidden" name="redirect" value="{{ 'newsletter/receipt' | hash }}">
         
         {% if mailchimpSubscribe is defined %}
           {% if (not mailchimpSubscribe.success) and (mailchimpSubscribe.errorCode!='1000') %}
