@@ -177,7 +177,7 @@ class MailchimpSubscribeService extends Component
             return $this->getMessage(1000, $email, false, Craft::t('mailchimp-subscribe', 'Invalid email'));
         }
 
-        $listIdStr = $formListId ?? $settings->listId;
+        $listIdStr = $formListId !== '' ? $formListId : $settings->listId;
 
         // check if we got an api key and a list id
         if ($settings->apiKey === '' || $listIdStr === '') { // error, no API key or list id
