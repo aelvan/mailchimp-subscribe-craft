@@ -161,7 +161,7 @@ class MailchimpSubscribeService extends Component
     }
 
     /**
-     * Check if email exists in one or more lists.
+     * Check if email is subscribed to one or more lists.
      *
      * @param string $email
      * @param string $formListId
