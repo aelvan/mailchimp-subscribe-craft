@@ -76,7 +76,42 @@ class ListController extends Controller
     }
 
     /**
-     * Controller action for checking if a user is on a list
+     * Controller action for unsubscribing an email to a list
+     * 
+     * @return null|\yii\web\Response
+     */
+    public function actionUnubscribe()
+    {
+        $this->requirePostRequest();
+        $request = Craft::$app->getRequest();
+        
+        // get post variables
+        $email = $request->getParam('email', '');
+        $formListId = $request->getParam('lid', '');
+
+        // call service method
+        $result = Plugin::$plugin->mailchimpSubscribe->unsubscribe($email, $formListId);
+        
+        // if this was an ajax request, return json
+        if ($request->getAcceptsJson()) {
+            return $this->asJson($result);
+        }
+        
+        // if a redirect variable was passed, do redirect
+        if ($redirect !== '' && $result['success']) {
+            return $this->redirectToPostedUrl(array('mailchimpSubscribe' => $result));
+        }
+        
+        // set route variables and return
+        Craft::$app->getUrlManager()->setRouteParams([
+            'variables' => ['mailchimpSubscribe' => $result]
+        ]);
+        
+        return null;
+    }
+
+    /**
+     * Controller action for checking if a user is subscribed to list
      * 
      * @return null|\yii\web\Response
      */
@@ -92,6 +127,42 @@ class ListController extends Controller
         
         // call service method
         $result = Plugin::$plugin->mailchimpSubscribe->checkIfSubscribed($email, $formListId);
+        
+        // if this was an ajax request, return json
+        if ($request->getAcceptsJson()) {
+            return $this->asJson($result);
+        }
+        
+        // if a redirect variable was passed, do redirect
+        if ($redirect !== '' && $result['success']) {
+            return $this->redirectToPostedUrl(array('mailchimpSubscribe' => $result));
+        }
+        
+        // set route variables and return
+        Craft::$app->getUrlManager()->setRouteParams([
+            'variables' => ['mailchimpSubscribe' => $result]
+        ]);
+        
+        return null;
+    }
+
+    /**
+     * Controller action for checking if a user is on a list
+     * 
+     * @return null|\yii\web\Response
+     */
+    public function actionCheckIfInList()
+    {
+        $this->requirePostRequest();
+        $request = Craft::$app->getRequest();
+        
+        // get post variables
+        $email = $request->getParam('email', '');
+        $formListId = $request->getParam('lid', '');
+        $redirect = $request->getParam('redirect', '');
+        
+        // call service method
+        $result = Plugin::$plugin->mailchimpSubscribe->checkIfInList($email, $formListId);
         
         // if this was an ajax request, return json
         if ($request->getAcceptsJson()) {
