@@ -177,7 +177,44 @@ class MailchimpSubscribeService extends Component
             return $this->getMessage(1000, $email, false, Craft::t('mailchimp-subscribe', 'Invalid email'));
         }
 
-        $listIdStr = $formListId ?? $settings->listId;
+        $listIdStr = $formListId !== '' ? $formListId : $settings->listId;
+
+        // check if we got an api key and a list id
+        if ($settings->apiKey === '' || $listIdStr === '') { // error, no API key or list id
+            return $this->getMessage(2000, $email, false, Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
+        }
+
+        $member = $this->getMemberByEmail($email, $listIdStr);
+
+        if ($member) {
+            if ($member['status'] === 'subscribed') {
+                return $this->getMessage(200, $email, [], Craft::t('mailchimp-subscribe', 'The email address exists on this list'), true);
+            } else {
+                return $this->getMessage(200, $email, [], Craft::t('mailchimp-subscribe', 'The email address was unsubscribed from this list'), false);
+            }
+        }
+
+        return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'The email address does not exist on this list'), false);
+    }
+
+    /**
+     * Check if email exists in one or more lists.
+     *
+     * @param string $email
+     * @param string $formListId
+     *
+     * @return array|mixed
+     */
+    public function checkIfInList($email, $formListId)
+    {
+        // get settings
+        $settings = Plugin::$plugin->getSettings();
+
+        if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
+            return $this->getMessage(1000, $email, false, Craft::t('mailchimp-subscribe', 'Invalid email'));
+        }
+
+        $listIdStr = $formListId !== '' ? $formListId : $settings->listId;
 
         // check if we got an api key and a list id
         if ($settings->apiKey === '' || $listIdStr === '') { // error, no API key or list id
