@@ -48,4 +48,17 @@ class MailchimpSubscribeVariable
         return Plugin::$plugin->mailchimpSubscribe->checkIfSubscribed($email, $listId);
     }
 
+    /**
+     * Check if email exists in one or more lists.
+     * 
+     * @param string $email
+     * @param null $listId
+     *
+     * @return array|mixed
+     */
+    public function checkIfInList($email, $listId = null)
+    {
+        return Plugin::$plugin->mailchimpSubscribe->checkIfInList($email, $listId);
+    }
+
 }
