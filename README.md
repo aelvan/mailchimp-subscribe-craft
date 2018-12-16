@@ -266,7 +266,7 @@ Or, you can use the controller action. Here's an example that should get you sta
 
       <form method="POST" id="testMCOnList">
           {{ csrfInput() }}
-          <input type="hidden" name="action" value="mailchimpSubscribe/list/CheckIfSubscribed">
+          <input type="hidden" name="action" value="mailchimp-subscribe/list/check-if-subscribed">
 
           Enter email to check: <input type="text" id="email" size="40" name="email" >
 
