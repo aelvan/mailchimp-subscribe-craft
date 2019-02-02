@@ -1,5 +1,9 @@
 # Mailchimp Subscribe Changelog
 
+## 2.0.4 - 2018-02-02
+### Fixed
+- Fixed bugs in unsubscribe controller action.
+
 ## 2.0.3 - 2018-12-16
 ### Added
 - Added new unsubscribe service method and controller action (thanks, @engram-design).
