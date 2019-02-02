@@ -80,7 +80,7 @@ class ListController extends Controller
      * 
      * @return null|\yii\web\Response
      */
-    public function actionUnubscribe()
+    public function actionUnsubscribe()
     {
         $this->requirePostRequest();
         $request = Craft::$app->getRequest();
@@ -88,6 +88,7 @@ class ListController extends Controller
         // get post variables
         $email = $request->getParam('email', '');
         $formListId = $request->getParam('lid', '');
+        $redirect = $request->getParam('redirect', '');
 
         // call service method
         $result = Plugin::$plugin->mailchimpSubscribe->unsubscribe($email, $formListId);
