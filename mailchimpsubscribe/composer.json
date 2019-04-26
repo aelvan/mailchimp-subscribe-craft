@@ -1,5 +1,7 @@
 {
     "require": {
-        "pacely/mailchimp-apiv3": "dev-master"
+        "pacely/mailchimp-apiv3": "dev-master",
+        "guzzlehttp/guzzle": "^6.3.0",
+        "guzzlehttp/psr7": "^1.4"
     }
 }
