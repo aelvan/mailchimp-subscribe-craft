@@ -1,7 +1,8 @@
 {
     "name": "aelvan/mailchimp-subscribe",
-    "description": "Simple Craft plugin for subscribing to a MailChimp list.",
+    "description": "Simple Craft plugin for subscribing to a MailChimp audience.",
     "type": "craft-plugin",
+    "version": "3.0.0",
     "keywords": [
         "craft",
         "cms",
