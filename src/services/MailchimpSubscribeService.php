@@ -43,7 +43,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // get list id string
-        $listIdStr = $formListId !== '' ? $formListId : $settings->listId;
+        $listIdStr = !empty($formListId) ? $formListId : $settings->listId;
 
         if ($settings->apiKey === '' || $listIdStr === '') { // error, no API key or list id
             return $this->getMessage(2000, $email, $vars, Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
@@ -128,7 +128,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // get list id string
-        $listIdStr = $formListId !== '' ? $formListId : $settings->listId;
+        $listIdStr = !empty($formListId) ? $formListId : $settings->listId;
 
         if ($settings->apiKey === '' || $listIdStr === '') { // error, no API key or list id
             return $this->getMessage(2000, $email, null, Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
@@ -177,7 +177,7 @@ class MailchimpSubscribeService extends Component
             return $this->getMessage(1000, $email, false, Craft::t('mailchimp-subscribe', 'Invalid email'));
         }
 
-        $listIdStr = $formListId !== '' ? $formListId : $settings->listId;
+        $listIdStr = !empty($formListId) ? $formListId : $settings->listId;
 
         // check if we got an api key and a list id
         if ($settings->apiKey === '' || $listIdStr === '') { // error, no API key or list id
@@ -214,7 +214,7 @@ class MailchimpSubscribeService extends Component
             return $this->getMessage(1000, $email, false, Craft::t('mailchimp-subscribe', 'Invalid email'));
         }
 
-        $listIdStr = $formListId !== '' ? $formListId : $settings->listId;
+        $listIdStr = !empty($formListId) ? $formListId : $settings->listId;
 
         // check if we got an api key and a list id
         if ($settings->apiKey === '' || $listIdStr === '') { // error, no API key or list id

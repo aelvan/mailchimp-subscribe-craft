@@ -26,11 +26,11 @@ class MailchimpSubscribeVariable
     /**
      * Get interest groups for list
      *
-     * @param $listId
+     * @param string $listId
      *
      * @return mixed
      */
-    public function getListInterestGroups($listId = null)
+    public function getListInterestGroups($listId = '')
     {
         return Plugin::$plugin->mailchimpSubscribe->getListInterestGroups($listId);
     }
@@ -39,11 +39,11 @@ class MailchimpSubscribeVariable
      * Check if email is subscribed to list
      * 
      * @param string $email
-     * @param null $listId
+     * @param string $listId
      *
      * @return array|mixed
      */
-    public function checkIfSubscribed($email, $listId = null)
+    public function checkIfSubscribed($email, $listId = '')
     {
         return Plugin::$plugin->mailchimpSubscribe->checkIfSubscribed($email, $listId);
     }
@@ -52,11 +52,11 @@ class MailchimpSubscribeVariable
      * Check if email exists in one or more lists.
      * 
      * @param string $email
-     * @param null $listId
+     * @param string $listId
      *
      * @return array|mixed
      */
-    public function checkIfInList($email, $listId = null)
+    public function checkIfInList($email, $listId = '')
     {
         return Plugin::$plugin->mailchimpSubscribe->checkIfInList($email, $listId);
     }
