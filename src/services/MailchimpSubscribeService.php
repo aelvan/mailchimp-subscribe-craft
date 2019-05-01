@@ -162,7 +162,7 @@ class MailchimpSubscribeService extends Component
         // loop over list id's and subscribe
 
         try {
-            $result = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)), null, 'DELETE');
+            $result = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)), [], 'DELETE');
         } catch (\Exception $e) { // an error occured
             $message = $e->getMessage();
             $errorObj = json_decode($message, false);
