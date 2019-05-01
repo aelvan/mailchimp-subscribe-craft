@@ -105,8 +105,16 @@ class MailchimpSubscribeService extends Component
         try {
             $result = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)), $postVars, 'PUT');
         } catch (\Exception $e) {
-            $msg = json_decode($e->getMessage());
-            return $this->getMessage($msg->status, $email, $vars, Craft::t('mailchimp-subscribe', $msg->title));
+            $message = $e->getMessage();
+            $errorObj = json_decode($message, false);
+            
+            if (JSON_ERROR_NONE !== json_last_error()) {
+                Craft::error('An error occured when trying to subscribe email `' . $email .  '`: ' . $message, __METHOD__);
+                return $this->getMessage($errorObj->status ?? '9999', $email, [], Craft::t('mailchimp-subscribe', $message));
+            }
+            
+            Craft::error('An error occured when trying to subscribe email `' . $email .  '`: ' . $errorObj->title . ' (' . $errorObj->status . ')', __METHOD__);
+            return $this->getMessage($errorObj->status, $email, [], Craft::t('mailchimp-subscribe', $errorObj->title));
         }
 
         return $this->getMessage(200, $email, $vars, Craft::t('mailchimp-subscribe', 'Subscribed successfully'), true);
@@ -156,8 +164,16 @@ class MailchimpSubscribeService extends Component
         try {
             $result = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)), null, 'DELETE');
         } catch (\Exception $e) { // an error occured
-            $msg = json_decode($e->getMessage());
-            return $this->getMessage($msg->status, $email, [], Craft::t('mailchimp-subscribe', $msg->title));
+            $message = $e->getMessage();
+            $errorObj = json_decode($message, false);
+            
+            if (JSON_ERROR_NONE !== json_last_error()) {
+                Craft::error('An error occured when trying to unsubscribe email `' . $email .  '`: ' . $message, __METHOD__);
+                return $this->getMessage($errorObj->status ?? '9999', $email, [], Craft::t('mailchimp-subscribe', $message));
+            }
+            
+            Craft::error('An error occured when trying to subscribe email `' . $email .  '`: ' . $errorObj->title . ' (' . $errorObj->status . ')', __METHOD__);
+            return $this->getMessage($errorObj->status, $email, [], Craft::t('mailchimp-subscribe', $errorObj->title));
         }
 
         return $this->getMessage(200, $email, [], Craft::t('mailchimp-subscribe', 'Unsubscribed successfully'), true);
@@ -193,7 +209,6 @@ class MailchimpSubscribeService extends Component
 
         if (count($listIdArr) > 1) {
             Craft::$app->deprecator->log(__METHOD__, 'Mailchimp Subscribe no longer supports using multiple lists by adding multiple list ids as a pipe-seperated string.');
-
             $listId = $listIdArr[0];
         }
 
@@ -240,7 +255,6 @@ class MailchimpSubscribeService extends Component
 
         if (count($listIdArr) > 1) {
             Craft::$app->deprecator->log(__METHOD__, 'Mailchimp Subscribe no longer supports using multiple lists by adding multiple list ids as a pipe-seperated string.');
-
             $listId = $listIdArr[0];
         }
 
@@ -262,7 +276,7 @@ class MailchimpSubscribeService extends Component
      * @param string $email
      * @param string $listId
      *
-     * @return array|mixed
+     * @return mixed
      */
     public function getMemberByEmail($email, $listId)
     {
@@ -306,7 +320,6 @@ class MailchimpSubscribeService extends Component
 
         if (count($listIdArr) > 1) {
             Craft::$app->deprecator->log(__METHOD__, 'Mailchimp Subscribe no longer supports using multiple lists by adding multiple list ids as a pipe-seperated string.');
-
             $listId = $listIdArr[0];
         }
 
