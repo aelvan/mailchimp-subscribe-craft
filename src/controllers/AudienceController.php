@@ -85,7 +85,7 @@ class AudienceController extends Controller
     }
 
     /**
-     * Controller action for unsubscribing an email to a list
+     * Controller action for unsubscribing an email from a list
      *
      * @return null|\yii\web\Response
      * @throws \yii\web\BadRequestHttpException
@@ -109,6 +109,51 @@ class AudienceController extends Controller
 
         // call service method
         $result = Plugin::$plugin->mailchimpSubscribe->unsubscribe($email, $audienceId);
+
+        // if this was an ajax request, return json
+        if ($request->getAcceptsJson()) {
+            return $this->asJson($result);
+        }
+
+        // if a redirect variable was passed, do redirect
+        if ($redirect !== '' && $result['success']) {
+            return $this->redirectToPostedUrl();
+        }
+
+        // set route variables and return
+        Craft::$app->getUrlManager()->setRouteParams([
+            'variables' => ['mailchimpSubscribe' => $result]
+        ]);
+
+        return null;
+    }
+    
+    /**
+     * Controller action for deleting an email from a list
+     *
+     * @return null|\yii\web\Response
+     * @throws \yii\web\BadRequestHttpException
+     * @throws DeprecationException
+     */
+    public function actionDelete()
+    {
+        $this->requirePostRequest();
+        $request = Craft::$app->getRequest();
+
+        // get post variables
+        $email = $request->getParam('email', '');
+        $audienceId = $request->getParam('audienceId', '');
+        $listId = $request->getParam('lid', '');
+        $permanent = $request->getParam('permanent', '');
+        $redirect = $request->getParam('redirect', '');
+        
+        if ($audienceId === '' && $listId !== '') {
+            Craft::$app->deprecator->log(__METHOD__, 'Passing the `lid` parameter to Mailchimp Subscribe\'s unsubscribe action is deprecated. Use `audienceId` instead.');
+            $audienceId = $listId;
+        }
+
+        // call service method
+        $result = Plugin::$plugin->mailchimpSubscribe->delete($email, $audienceId, $permanent==='on' || $permanent==='yes' || $permanent==='1' || $permanent==='true');
 
         // if this was an ajax request, return json
         if ($request->getAcceptsJson()) {
