@@ -12,8 +12,11 @@ namespace aelvan\mailchimpsubscribe\services;
 
 use Craft;
 use craft\base\Component;
-use aelvan\mailchimpsubscribe\MailchimpSubscribe as Plugin;
+use craft\errors\DeprecationException;
+
 use Mailchimp\Mailchimp;
+
+use aelvan\mailchimpsubscribe\MailchimpSubscribe as Plugin;
 
 /**
  * @author    André Elvan
@@ -23,17 +26,18 @@ use Mailchimp\Mailchimp;
 class MailchimpSubscribeService extends Component
 {
     /**
-     * Subscribe to one or more Mailchimp lists
+     * Subscribe to a Mailchimp lists
      *
      * @param string $email
-     * @param string $formListId
+     * @param string $listId
      * @param string $emailType
-     * @param array  $vars
+     * @param array $vars
      * @param string $language
      *
      * @return array
+     * @throws DeprecationException
      */
-    public function subscribe($email, $formListId, $emailType = 'html', $vars = null, $language = null)
+    public function subscribe($email, $listId, $emailType = 'html', $vars = null, $language = null): array
     {
         // get settings
         $settings = Plugin::$plugin->getSettings();
@@ -43,9 +47,9 @@ class MailchimpSubscribeService extends Component
         }
 
         // get list id string
-        $listIdStr = !empty($formListId) ? $formListId : $settings->listId;
+        $listId = !empty($listId) ? $listId : $settings->listId;
 
-        if ($settings->apiKey === '' || $listIdStr === '') { // error, no API key or list id
+        if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
             return $this->getMessage(2000, $email, $vars, Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
         }
 
@@ -53,7 +57,15 @@ class MailchimpSubscribeService extends Component
         $mc = new Mailchimp($settings->apiKey);
 
         // split id string on | in case more than one list id is supplied
-        $listIdArr = explode('|', $listIdStr);
+        $listIdArr = explode('|', $listId);
+
+        if (count($listIdArr) > 1) {
+            Craft::$app->deprecator->log(__METHOD__,
+                'Mailchimp Subscribe no longer supports subscribing to multiple lists by adding multiple list ids as a 
+                pipe-seperated string. The user will only be subscribed to the first list id.');
+
+            $listId = $listIdArr[0];
+        }
 
         // convert interest groups if present
         $interests = [];
@@ -64,61 +76,52 @@ class MailchimpSubscribeService extends Component
             unset($vars['interests']);
         }
 
-        // loop over list id's and subscribe
-        $results = [];
+        $member = $this->getMemberByEmail($email, $listId);
 
-        foreach ($listIdArr as $listId) {
-            $member = $this->getMemberByEmail($email, $listId);
-
-            if ($member && !empty($interests) && isset($member['interests'])) {
-                $interests = $this->prepInterests($listId, $member, $interests);
-            }
-
-            // subscribe
-            $postVars = [
-                'status_if_new' => $settings->doubleOptIn ? 'pending' : 'subscribed',
-                'email_type' => $emailType,
-                'email_address' => $email
-            ];
-
-            if (isset($vars) && \count($vars) > 0) {
-                $postVars['merge_fields'] = $vars;
-            }
-
-            if (!empty($interests)) {
-                $postVars['interests'] = $interests;
-                $vars['interests'] = $interests;
-            }
-
-            if (null !== $language) {
-                $postVars['language'] = $language;
-            }
-
-            try {
-                $result = $mc->request('lists/'.$listId.'/members/'.md5(strtolower($email)), $postVars, 'PUT');
-                $results[] = $this->getMessage(200, $email, $vars, Craft::t('mailchimp-subscribe', 'Subscribed successfully'), true);
-            } catch (\Exception $e) { // an error occured
-                $msg = json_decode($e->getMessage());
-                $results[] = $this->getMessage($msg->status, $email, $vars, Craft::t('mailchimp-subscribe', $msg->title));
-            }
+        if ($member && !empty($interests) && isset($member['interests'])) {
+            $interests = $this->prepInterests($listId, $member, $interests);
         }
 
-        if (\count($results) > 1) {
-            return $this->parseMultipleListsResult($results);
+        // subscribe
+        $postVars = [
+            'status_if_new' => $settings->doubleOptIn ? 'pending' : 'subscribed',
+            'email_type' => $emailType,
+            'email_address' => $email
+        ];
+
+        if (isset($vars) && \count($vars) > 0) {
+            $postVars['merge_fields'] = $vars;
         }
 
-        return $results[0];
+        if (!empty($interests)) {
+            $postVars['interests'] = $interests;
+            $vars['interests'] = $interests;
+        }
+
+        if (null !== $language) {
+            $postVars['language'] = $language;
+        }
+
+        try {
+            $result = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)), $postVars, 'PUT');
+        } catch (\Exception $e) {
+            $msg = json_decode($e->getMessage());
+            return $this->getMessage($msg->status, $email, $vars, Craft::t('mailchimp-subscribe', $msg->title));
+        }
+
+        return $this->getMessage(200, $email, $vars, Craft::t('mailchimp-subscribe', 'Subscribed successfully'), true);
     }
 
     /**
-     * Unsubscribe from one or more Mailchimp lists
+     * Unsubscribe from a Mailchimp lists
      *
      * @param string $email
-     * @param string $formListId
+     * @param string $listId
      *
      * @return array
+     * @throws DeprecationException
      */
-    public function unsubscribe($email, $formListId)
+    public function unsubscribe($email, $listId): array
     {
         // get settings
         $settings = Plugin::$plugin->getSettings();
@@ -128,9 +131,9 @@ class MailchimpSubscribeService extends Component
         }
 
         // get list id string
-        $listIdStr = !empty($formListId) ? $formListId : $settings->listId;
+        $listId = !empty($listId) ? $listId : $settings->listId;
 
-        if ($settings->apiKey === '' || $listIdStr === '') { // error, no API key or list id
+        if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
             return $this->getMessage(2000, $email, null, Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
         }
 
@@ -138,37 +141,38 @@ class MailchimpSubscribeService extends Component
         $mc = new Mailchimp($settings->apiKey);
 
         // split id string on | in case more than one list id is supplied
-        $listIdArr = explode('|', $listIdStr);
+        $listIdArr = explode('|', $listId);
+
+        if (count($listIdArr) > 1) {
+            Craft::$app->deprecator->log(__METHOD__,
+                'Mailchimp Subscribe no longer supports unsubscribing from multiple lists by adding multiple list ids as a 
+                pipe-seperated string. The user will only be unsubscribed from the first list id.');
+
+            $listId = $listIdArr[0];
+        }
 
         // loop over list id's and subscribe
-        $results = [];
 
-        foreach ($listIdArr as $listId) {
-            try {
-                $result = $mc->request('lists/'.$listId.'/members/'.md5(strtolower($email)), null, 'DELETE');
-                $results[] = $this->getMessage(200, $email, null, Craft::t('mailchimp-subscribe', 'Unsubscribed successfully'), true);
-            } catch (\Exception $e) { // an error occured
-                $msg = json_decode($e->getMessage());
-                $results[] = $this->getMessage($msg->status, $email, null, Craft::t('mailchimp-subscribe', $msg->title));
-            }
+        try {
+            $result = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)), null, 'DELETE');
+        } catch (\Exception $e) { // an error occured
+            $msg = json_decode($e->getMessage());
+            return $this->getMessage($msg->status, $email, null, Craft::t('mailchimp-subscribe', $msg->title));
         }
 
-        if (\count($results) > 1) {
-            return $this->parseMultipleListsResult($results);
-        }
-
-        return $results[0];
+        return $this->getMessage(200, $email, null, Craft::t('mailchimp-subscribe', 'Unsubscribed successfully'), true);
     }
 
     /**
      * Check if email is subscribed to one or more lists.
      *
      * @param string $email
-     * @param string $formListId
+     * @param string $listId
      *
      * @return array|mixed
+     * @throws DeprecationException
      */
-    public function checkIfSubscribed($email, $formListId)
+    public function checkIfSubscribed($email, $listId)
     {
         // get settings
         $settings = Plugin::$plugin->getSettings();
@@ -177,14 +181,23 @@ class MailchimpSubscribeService extends Component
             return $this->getMessage(1000, $email, false, Craft::t('mailchimp-subscribe', 'Invalid email'));
         }
 
-        $listIdStr = !empty($formListId) ? $formListId : $settings->listId;
+        $listId = !empty($listId) ? $listId : $settings->listId;
 
         // check if we got an api key and a list id
-        if ($settings->apiKey === '' || $listIdStr === '') { // error, no API key or list id
+        if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
             return $this->getMessage(2000, $email, false, Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
         }
 
-        $member = $this->getMemberByEmail($email, $listIdStr);
+        // split id string on | in case more than one list id is supplied
+        $listIdArr = explode('|', $listId);
+
+        if (count($listIdArr) > 1) {
+            Craft::$app->deprecator->log(__METHOD__, 'Mailchimp Subscribe no longer supports using multiple lists by adding multiple list ids as a pipe-seperated string.');
+
+            $listId = $listIdArr[0];
+        }
+
+        $member = $this->getMemberByEmail($email, $listId);
 
         if ($member) {
             if ($member['status'] === 'subscribed') {
@@ -201,11 +214,12 @@ class MailchimpSubscribeService extends Component
      * Check if email exists in one or more lists.
      *
      * @param string $email
-     * @param string $formListId
+     * @param string $listId
      *
      * @return array|mixed
+     * @throws DeprecationException
      */
-    public function checkIfInList($email, $formListId)
+    public function checkIfInList($email, $listId)
     {
         // get settings
         $settings = Plugin::$plugin->getSettings();
@@ -214,14 +228,28 @@ class MailchimpSubscribeService extends Component
             return $this->getMessage(1000, $email, false, Craft::t('mailchimp-subscribe', 'Invalid email'));
         }
 
-        $listIdStr = !empty($formListId) ? $formListId : $settings->listId;
+        $listId = !empty($listId) ? $listId : $settings->listId;
 
         // check if we got an api key and a list id
-        if ($settings->apiKey === '' || $listIdStr === '') { // error, no API key or list id
+        if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
             return $this->getMessage(2000, $email, false, Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
         }
 
-        if ($this->getMemberByEmail($email, $listIdStr)) {
+        // split id string on | in case more than one list id is supplied
+        $listIdArr = explode('|', $listId);
+
+        if (count($listIdArr) > 1) {
+            Craft::$app->deprecator->log(__METHOD__, 'Mailchimp Subscribe no longer supports using multiple lists by adding multiple list ids as a pipe-seperated string.');
+
+            $listId = $listIdArr[0];
+        }
+
+        // check if we got an api key and a list id
+        if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
+            return $this->getMessage(2000, $email, false, Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
+        }
+
+        if ($this->getMemberByEmail($email, $listId)) {
             return $this->getMessage(200, $email, [], Craft::t('mailchimp-subscribe', 'The email address exists on this list'), true);
         }
 
@@ -235,40 +263,34 @@ class MailchimpSubscribeService extends Component
      * @param string $listId
      *
      * @return array
+     * @throws DeprecationException
      */
-    public function getListInterestGroups($listId = null)
+    public function getListInterestGroups($listId = '')
     {
         // get settings
         $settings = Plugin::$plugin->getSettings();
 
-        if ($listId === null) {
-            $listId = $settings->listId;
-        }
-
-        // get settings
-        $settings = Plugin::$plugin->getSettings();
-
-        if ($listId === '') {
-            // todo : should use our new model
-            return [
-                'success' => false,
-                'message' => Craft::t('mailchimp-subscribe', 'No list ID given')
-            ];
-        }
+        $listId = !empty($listId) ? $listId : $settings->listId;
 
         // check if we got an api key and a list id
-        if ($settings->apiKey === '') {
-            return [
-                'success' => false,
-                'message' => 'API Key not supplied. Check your settings.'
-            ];
+        if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
+            return $this->getMessage(2000, '', false, Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
+        }
+
+        // split id string on | in case more than one list id is supplied
+        $listIdArr = explode('|', $listId);
+
+        if (count($listIdArr) > 1) {
+            Craft::$app->deprecator->log(__METHOD__, 'Mailchimp Subscribe no longer supports using multiple lists by adding multiple list ids as a pipe-seperated string.');
+
+            $listId = $listIdArr[0];
         }
 
         // create a new api instance
         $mc = new Mailchimp($settings->apiKey);
 
         try {
-            $result = $mc->request('lists/'.$listId.'/interest-categories');
+            $result = $mc->request('lists/' . $listId . '/interest-categories');
 
             $return = [];
 
@@ -278,7 +300,7 @@ class MailchimpSubscribeService extends Component
                 $categoryData['type'] = $category->type;
                 $categoryData['interests'] = [];
 
-                $interestsResult = $mc->request('lists/'.$listId.'/interest-categories/'.$category->id.'/interests');
+                $interestsResult = $mc->request('lists/' . $listId . '/interest-categories/' . $category->id . '/interests');
 
                 foreach ($interestsResult['interests'] as $interest) {
                     $interestData = [];
@@ -314,6 +336,7 @@ class MailchimpSubscribeService extends Component
      * @param $interests
      *
      * @return array
+     * @throws DeprecationException
      */
     private function prepInterests($listId, $member, $interests): array
     {
@@ -358,31 +381,6 @@ class MailchimpSubscribeService extends Component
     }
 
     /**
-     * Parses array with multiple list results and creates a backward compatible
-     * return value that will have success => false if one of the lists failed.
-     * listResults contains all results.
-     *
-     * @param array $results
-     *
-     * @return mixed
-     */
-    private function parseMultipleListsResult($results)
-    {
-        $base = $results[0];
-
-        foreach ($results as $result) {
-            if ($result['success'] == false) {
-                $base = $result;
-                break;
-            }
-        }
-
-        $base['listResults'] = $results;
-
-        return $base;
-    }
-
-    /**
      * Return user object by email if it is present in one or more lists.
      *
      * @param string $email
@@ -399,7 +397,7 @@ class MailchimpSubscribeService extends Component
         $mc = new Mailchimp($settings->apiKey);
 
         try {
-            $member = $mc->request('lists/'.$listId.'/members/'.md5(strtolower($email)));
+            $member = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)));
         } catch (\Exception $e) { // subscriber didn't exist
             $member = false;
         }
@@ -414,7 +412,7 @@ class MailchimpSubscribeService extends Component
      * @param        $email
      * @param        $vars
      * @param string $message
-     * @param bool   $success
+     * @param bool $success
      *
      * @return array
      * @author Martin Blackburn
