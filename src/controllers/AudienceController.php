@@ -10,10 +10,11 @@
 
 namespace aelvan\mailchimpsubscribe\controllers;
 
-use aelvan\mailchimpsubscribe\MailchimpSubscribe as Plugin;
-
 use Craft;
 use craft\web\Controller;
+use craft\errors\DeprecationException;
+
+use aelvan\mailchimpsubscribe\MailchimpSubscribe as Plugin;
 
 /**
  * @author    André Elvan
@@ -41,38 +42,45 @@ class AudienceController extends Controller
      *
      * @return null|\yii\web\Response
      * @throws \yii\web\BadRequestHttpException
+     * @throws DeprecationException
      */
     public function actionSubscribe()
     {
         $this->requirePostRequest();
         $request = Craft::$app->getRequest();
-        
+
         // get post variables
         $email = $request->getParam('email', '');
-        $formListId = $request->getParam('lid', '');
+        $audienceId = $request->getParam('audienceId', '');
+        $listId = $request->getParam('lid', '');
         $emailType = $request->getParam('emailtype', 'html');
         $vars = $request->getParam('mcvars', null);
         $redirect = $request->getParam('redirect', '');
         $language = $request->getParam('language', null);
 
+        if ($audienceId === '' && $listId !== '') {
+            Craft::$app->deprecator->log(__METHOD__, 'Passing the `lid` parameter to Mailchimp Subscribe\'s subscribe action is deprecated. Use `audienceId` instead.');
+            $audienceId = $listId;
+        }
+
         // call service method
-        $result = Plugin::$plugin->mailchimpSubscribe->subscribe($email, $formListId, $emailType, $vars, $language);
-        
+        $result = Plugin::$plugin->mailchimpSubscribe->subscribe($email, $audienceId, $emailType, $vars, $language);
+
         // if this was an ajax request, return json
         if ($request->getAcceptsJson()) {
             return $this->asJson($result);
         }
-        
+
         // if a redirect variable was passed, do redirect
         if ($redirect !== '' && $result['success']) {
             return $this->redirectToPostedUrl();
         }
-        
+
         // set route variables and return
         Craft::$app->getUrlManager()->setRouteParams([
             'variables' => ['mailchimpSubscribe' => $result]
         ]);
-        
+
         return null;
     }
 
@@ -81,35 +89,42 @@ class AudienceController extends Controller
      *
      * @return null|\yii\web\Response
      * @throws \yii\web\BadRequestHttpException
+     * @throws DeprecationException
      */
     public function actionUnsubscribe()
     {
         $this->requirePostRequest();
         $request = Craft::$app->getRequest();
-        
+
         // get post variables
         $email = $request->getParam('email', '');
-        $formListId = $request->getParam('lid', '');
+        $audienceId = $request->getParam('audienceId', '');
+        $listId = $request->getParam('lid', '');
         $redirect = $request->getParam('redirect', '');
+        
+        if ($audienceId === '' && $listId !== '') {
+            Craft::$app->deprecator->log(__METHOD__, 'Passing the `lid` parameter to Mailchimp Subscribe\'s unsubscribe action is deprecated. Use `audienceId` instead.');
+            $audienceId = $listId;
+        }
 
         // call service method
-        $result = Plugin::$plugin->mailchimpSubscribe->unsubscribe($email, $formListId);
-        
+        $result = Plugin::$plugin->mailchimpSubscribe->unsubscribe($email, $audienceId);
+
         // if this was an ajax request, return json
         if ($request->getAcceptsJson()) {
             return $this->asJson($result);
         }
-        
+
         // if a redirect variable was passed, do redirect
         if ($redirect !== '' && $result['success']) {
             return $this->redirectToPostedUrl();
         }
-        
+
         // set route variables and return
         Craft::$app->getUrlManager()->setRouteParams([
             'variables' => ['mailchimpSubscribe' => $result]
         ]);
-        
+
         return null;
     }
 
@@ -118,35 +133,42 @@ class AudienceController extends Controller
      *
      * @return null|\yii\web\Response
      * @throws \yii\web\BadRequestHttpException
+     * @throws DeprecationException
      */
     public function actionCheckIfSubscribed()
     {
         $this->requirePostRequest();
         $request = Craft::$app->getRequest();
-        
+
         // get post variables
         $email = $request->getParam('email', '');
-        $formListId = $request->getParam('lid', '');
+        $audienceId = $request->getParam('audienceId', '');
+        $listId = $request->getParam('lid', '');
         $redirect = $request->getParam('redirect', '');
+
+        if ($audienceId === '' && $listId !== '') {
+            Craft::$app->deprecator->log(__METHOD__, 'Passing the `lid` parameter to Mailchimp Subscribe\'s checkIfSubscribed action is deprecated. Use `audienceId` instead.');
+            $audienceId = $listId;
+        }
         
         // call service method
-        $result = Plugin::$plugin->mailchimpSubscribe->checkIfSubscribed($email, $formListId);
-        
+        $result = Plugin::$plugin->mailchimpSubscribe->checkIfSubscribed($email, $audienceId);
+
         // if this was an ajax request, return json
         if ($request->getAcceptsJson()) {
             return $this->asJson($result);
         }
-        
+
         // if a redirect variable was passed, do redirect
         if ($redirect !== '' && $result['success']) {
             return $this->redirectToPostedUrl();
         }
-        
+
         // set route variables and return
         Craft::$app->getUrlManager()->setRouteParams([
             'variables' => ['mailchimpSubscribe' => $result]
         ]);
-        
+
         return null;
     }
 
@@ -155,35 +177,42 @@ class AudienceController extends Controller
      *
      * @return null|\yii\web\Response
      * @throws \yii\web\BadRequestHttpException
+     * @throws DeprecationException
      */
     public function actionCheckIfInList()
     {
         $this->requirePostRequest();
         $request = Craft::$app->getRequest();
-        
+
         // get post variables
         $email = $request->getParam('email', '');
-        $formListId = $request->getParam('lid', '');
+        $audienceId = $request->getParam('audienceId', '');
+        $listId = $request->getParam('lid', '');
         $redirect = $request->getParam('redirect', '');
+
+        if ($audienceId === '' && $listId !== '') {
+            Craft::$app->deprecator->log(__METHOD__, 'Passing the `lid` parameter to Mailchimp Subscribe\'s checkIfInList action is deprecated. Use `audienceId` instead.');
+            $audienceId = $listId;
+        }
         
         // call service method
-        $result = Plugin::$plugin->mailchimpSubscribe->checkIfInList($email, $formListId);
-        
+        $result = Plugin::$plugin->mailchimpSubscribe->checkIfInList($email, $audienceId);
+
         // if this was an ajax request, return json
         if ($request->getAcceptsJson()) {
             return $this->asJson($result);
         }
-        
+
         // if a redirect variable was passed, do redirect
         if ($redirect !== '' && $result['success']) {
-            return $this->redirectToPostedUrl(array('mailchimpSubscribe' => $result));
+            return $this->redirectToPostedUrl();
         }
-        
+
         // set route variables and return
         Craft::$app->getUrlManager()->setRouteParams([
             'variables' => ['mailchimpSubscribe' => $result]
         ]);
-        
+
         return null;
     }
 }
