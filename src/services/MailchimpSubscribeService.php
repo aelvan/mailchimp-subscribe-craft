@@ -127,14 +127,14 @@ class MailchimpSubscribeService extends Component
         $settings = Plugin::$plugin->getSettings();
 
         if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
-            return $this->getMessage(1000, $email, null, Craft::t('mailchimp-subscribe', 'Invalid email'));
+            return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'Invalid email'));
         }
 
         // get list id string
         $listId = !empty($listId) ? $listId : $settings->listId;
 
         if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
-            return $this->getMessage(2000, $email, null, Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
+            return $this->getMessage(2000, $email, [], Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
         }
 
         // create a new api instance, and subscribe
@@ -157,10 +157,10 @@ class MailchimpSubscribeService extends Component
             $result = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)), null, 'DELETE');
         } catch (\Exception $e) { // an error occured
             $msg = json_decode($e->getMessage());
-            return $this->getMessage($msg->status, $email, null, Craft::t('mailchimp-subscribe', $msg->title));
+            return $this->getMessage($msg->status, $email, [], Craft::t('mailchimp-subscribe', $msg->title));
         }
 
-        return $this->getMessage(200, $email, null, Craft::t('mailchimp-subscribe', 'Unsubscribed successfully'), true);
+        return $this->getMessage(200, $email, [], Craft::t('mailchimp-subscribe', 'Unsubscribed successfully'), true);
     }
 
     /**
@@ -178,14 +178,14 @@ class MailchimpSubscribeService extends Component
         $settings = Plugin::$plugin->getSettings();
 
         if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
-            return $this->getMessage(1000, $email, false, Craft::t('mailchimp-subscribe', 'Invalid email'));
+            return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'Invalid email'));
         }
 
         $listId = !empty($listId) ? $listId : $settings->listId;
 
         // check if we got an api key and a list id
         if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
-            return $this->getMessage(2000, $email, false, Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
+            return $this->getMessage(2000, $email, [], Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
         }
 
         // split id string on | in case more than one list id is supplied
@@ -225,14 +225,14 @@ class MailchimpSubscribeService extends Component
         $settings = Plugin::$plugin->getSettings();
 
         if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
-            return $this->getMessage(1000, $email, false, Craft::t('mailchimp-subscribe', 'Invalid email'));
+            return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'Invalid email'));
         }
 
         $listId = !empty($listId) ? $listId : $settings->listId;
 
         // check if we got an api key and a list id
         if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
-            return $this->getMessage(2000, $email, false, Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
+            return $this->getMessage(2000, $email, [], Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
         }
 
         // split id string on | in case more than one list id is supplied
@@ -246,7 +246,7 @@ class MailchimpSubscribeService extends Component
 
         // check if we got an api key and a list id
         if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
-            return $this->getMessage(2000, $email, false, Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
+            return $this->getMessage(2000, $email, [], Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
         }
 
         if ($this->getMemberByEmail($email, $listId)) {
@@ -298,7 +298,7 @@ class MailchimpSubscribeService extends Component
 
         // check if we got an api key and a list id
         if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
-            return $this->getMessage(2000, '', false, Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
+            return $this->getMessage(2000, '', [], Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
         }
 
         // split id string on | in case more than one list id is supplied
@@ -351,6 +351,12 @@ class MailchimpSubscribeService extends Component
             ];
         }
     }
+
+
+    
+    /**
+     * --- Private methods --------------------------------------------------------------------------------------
+     */
 
     /**
      * Removes existing interests in groups of type radio or dropdown, and merges all other interests
@@ -441,7 +447,7 @@ class MailchimpSubscribeService extends Component
      * @return boolean
      * @author André Elvan
      */
-    public function validateEmail($email)
+    public function validateEmail($email): bool
     {
         $isValid = true;
         $atIndex = strrpos($email, '@');
@@ -452,7 +458,7 @@ class MailchimpSubscribeService extends Component
             $local = substr($email, 0, $atIndex);
             $localLen = strlen($local);
             $domainLen = strlen($domain);
-            
+
             if ($localLen < 1 || $localLen > 64) {
                 // local part length exceeded
                 $isValid = false;
@@ -478,7 +484,7 @@ class MailchimpSubscribeService extends Component
                     $isValid = false;
                 }
             }
-            
+
             if ($isValid && !(checkdnsrr($domain, "MX") || checkdnsrr($domain, "A"))) {
                 // domain not found in DNS
                 $isValid = false;
