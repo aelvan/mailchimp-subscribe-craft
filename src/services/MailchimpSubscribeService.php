@@ -256,6 +256,30 @@ class MailchimpSubscribeService extends Component
         return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'The email address does not exist on this list'), false);
     }
 
+    /**
+     * Return user object by email if it is present in one or more lists.
+     *
+     * @param string $email
+     * @param string $listId
+     *
+     * @return array|mixed
+     */
+    public function getMemberByEmail($email, $listId)
+    {
+        // get settings
+        $settings = Plugin::$plugin->getSettings();
+
+        // create a new api instance
+        $mc = new Mailchimp($settings->apiKey);
+
+        try {
+            $member = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)));
+        } catch (\Exception $e) { // subscriber didn't exist
+            $member = false;
+        }
+
+        return $member;
+    }
 
     /**
      * Returns interest groups in list by list id
@@ -380,44 +404,20 @@ class MailchimpSubscribeService extends Component
         return false;
     }
 
-    /**
-     * Return user object by email if it is present in one or more lists.
-     *
-     * @param string $email
-     * @param string $listId
-     *
-     * @return array|mixed
-     */
-    private function getMemberByEmail($email, $listId)
-    {
-        // get settings
-        $settings = Plugin::$plugin->getSettings();
-
-        // create a new api instance
-        $mc = new Mailchimp($settings->apiKey);
-
-        try {
-            $member = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)));
-        } catch (\Exception $e) { // subscriber didn't exist
-            $member = false;
-        }
-
-        return $member;
-    }
 
     /**
      * Creates return message object
      *
-     * @param        $errorcode
-     * @param        $email
-     * @param        $vars
+     * @param string|int $errorcode
+     * @param string $email
+     * @param array $vars
      * @param string $message
      * @param bool $success
      *
      * @return array
      * @author Martin Blackburn
      */
-    private function getMessage($errorcode, $email, $vars, $message = '', $success = false)
+    private function getMessage($errorcode, $email, $vars, $message = '', $success = false): array
     {
         return [
             'success' => $success,
