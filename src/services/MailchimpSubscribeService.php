@@ -331,17 +331,28 @@ class MailchimpSubscribeService extends Component
     }
 
     /**
-     * Return user object by email if it is present in one or more lists.
+     * Return member object by email
      *
      * @param string $email
      * @param string $listId
      *
      * @return mixed
+     * @throws DeprecationException
      */
     public function getMemberByEmail($email, $listId)
     {
         // get settings
         $settings = Plugin::$plugin->getSettings();
+        $listId = $this->prepAudienceId($listId);
+
+        if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
+            return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'Invalid email'));
+        }
+        
+        // check if we got an api key and a list id
+        if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
+            return $this->getMessage(2000, $email, [], Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
+        }
 
         // create a new api instance
         $mc = new Mailchimp($settings->apiKey);
@@ -349,10 +360,41 @@ class MailchimpSubscribeService extends Component
         try {
             $member = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)));
         } catch (\Exception $e) { // subscriber didn't exist
-            $member = false;
+            $member = null;
         }
 
         return $member;
+    }
+
+    /**
+     * Return list object by list id
+     *
+     * @param string $listId
+     *
+     * @return mixed
+     * @throws DeprecationException
+     */
+    public function getListById($listId)
+    {
+        // get settings
+        $settings = Plugin::$plugin->getSettings();
+        $listId = $this->prepAudienceId($listId);
+
+        // check if we got an api key and a list id
+        if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
+            return $this->getMessage(2000, $email, [], Craft::t('mailchimp-subscribe', 'API Key or List ID not supplied. Check your settings.'));
+        }
+        
+        // create a new api instance
+        $mc = new Mailchimp($settings->apiKey);
+
+        try {
+            $list = $mc->request('lists/' . $listId);
+        } catch (\Exception $e) { // subscriber didn't exist
+            $list = null;
+        }
+
+        return $list;
     }
 
     /**
@@ -426,10 +468,32 @@ class MailchimpSubscribeService extends Component
     }
 
 
-
     /**
      * --- Private methods --------------------------------------------------------------------------------------
      */
+
+    /**
+     * Gets the correct list ID to use. Throws deprecation errors if something is wrong. 
+     *
+     * @param $audienceId
+     * @return string
+     * @throws DeprecationException
+     */
+    private function prepAudienceId($audienceId): string
+    {
+        $settings = Plugin::$plugin->getSettings();
+        $audienceId = !empty($audienceId) ? $audienceId : $settings->listId;
+
+        // split id string on | in case more than one list id is supplied
+        $audienceIdArr = explode('|', $audienceId);
+
+        if (count($audienceIdArr) > 1) {
+            Craft::$app->deprecator->log(__METHOD__, 'Mailchimp Subscribe no longer supports using multiple lists by adding multiple list ids as a pipe-seperated string.');
+            $audienceId = $audienceIdArr[0];
+        }
+        
+        return $audienceId;
+    }
 
     /**
      * Removes existing interests in groups of type radio or dropdown, and merges all other interests

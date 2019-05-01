@@ -44,10 +44,24 @@ class MailchimpSubscribeVariable
      * @param string $listId
      *
      * @return mixed
+     * @throws DeprecationException
      */
     public function getMemberByEmail($email, $listId = '')
     {
         return Plugin::$plugin->mailchimpSubscribe->getMemberByEmail($email, $listId);
+    }
+
+    /**
+     * Get list by id
+     *
+     * @param string $listId
+     *
+     * @return mixed
+     * @throws DeprecationException
+     */
+    public function getListById($listId = '')
+    {
+        return Plugin::$plugin->mailchimpSubscribe->getListById($listId);
     }
 
     /**
