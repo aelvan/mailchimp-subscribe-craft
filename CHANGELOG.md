@@ -1,5 +1,14 @@
 # Mailchimp Subscribe Changelog
 
+## Unreleased
+
+### Deprecated
+- Deprecated `list` controller in favor of `audience` controller.  
+
+### Fixed
+- Fixed incorrect use of parameters in redirectToPostedUrl.
+
+
 ## 2.0.4 - 2018-02-02
 ### Fixed
 - Fixed bugs in unsubscribe controller action.
