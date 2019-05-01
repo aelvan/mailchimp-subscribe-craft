@@ -11,7 +11,7 @@
 namespace aelvan\mailchimpsubscribe;
 
 use aelvan\mailchimpsubscribe\models\Settings;
-use aelvan\mailchimpsubscribe\services\MailchimpSubscribeService as SubscribeService;
+use aelvan\mailchimpsubscribe\services\MailchimpSubscribeService;
 use aelvan\mailchimpsubscribe\variables\MailchimpSubscribeVariable;
 
 use Craft;
@@ -27,7 +27,7 @@ use yii\base\Event;
  * @package   MailchimpSubscribe
  * @since     2.0.0
  *
- * @property  SubscribeService $mailchimpSubscribe
+ * @property  MailchimpSubscribeService $mailchimpSubscribe
  */
 class MailchimpSubscribe extends Plugin
 {
@@ -50,12 +50,15 @@ class MailchimpSubscribe extends Plugin
         parent::init();
         self::$plugin = $this;
         
-        $this->set('mailchimpSubscribe', '\aelvan\mailchimpsubscribe\services\MailchimpSubscribeService');
+        // Register services
+        $this->setComponents([
+            'mailchimpSubscribe' => MailchimpSubscribeService::class
+        ]);
         
         Event::on(
             CraftVariable::class,
             CraftVariable::EVENT_INIT,
-            function (Event $event) {
+            static function (Event $event) {
                 /** @var CraftVariable $variable */
                 $variable = $event->sender;
                 $variable->set('mailchimpSubscribe', MailchimpSubscribeVariable::class);
