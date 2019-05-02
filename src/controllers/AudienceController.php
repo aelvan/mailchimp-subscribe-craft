@@ -15,6 +15,8 @@ use craft\web\Controller;
 use craft\errors\DeprecationException;
 
 use aelvan\mailchimpsubscribe\MailchimpSubscribe as Plugin;
+use yii\web\BadRequestHttpException;
+use yii\web\Response;
 
 /**
  * @author    André Elvan
@@ -40,8 +42,8 @@ class AudienceController extends Controller
     /**
      * Controller action for subscribing an email to a list
      *
-     * @return null|\yii\web\Response
-     * @throws \yii\web\BadRequestHttpException
+     * @return null|Response
+     * @throws BadRequestHttpException
      * @throws DeprecationException
      */
     public function actionSubscribe()
@@ -52,19 +54,58 @@ class AudienceController extends Controller
         // get post variables
         $email = $request->getParam('email', '');
         $audienceId = $request->getParam('audienceId', '');
-        $listId = $request->getParam('lid', '');
-        $emailType = $request->getParam('emailtype', 'html');
-        $vars = $request->getParam('mcvars', null);
-        $redirect = $request->getParam('redirect', '');
+        $emailType = $request->getParam('email_type', 'html');
         $language = $request->getParam('language', null);
+        $mergeFields = $request->getParam('merge_fields', null);
+        $marketingPermissions = $request->getParam('marketing_permissions', null);
+        $interests = $request->getParam('interests', null);
+        $tags = $request->getParam('tags', null);
+        $vip = $this->parseBoolParam($request->getParam('vip', false));
+        $redirect = $request->getParam('redirect', '');
+        
+        // deprecated parameters
+        $listId = $request->getParam('lid', '');
+        $emailTypeOld = $request->getParam('emailtype', '');
+        $mcvars = $request->getParam('mcvars', null);
 
         if ($audienceId === '' && $listId !== '') {
             Craft::$app->deprecator->log(__METHOD__, 'Passing the `lid` parameter to Mailchimp Subscribe\'s subscribe action is deprecated. Use `audienceId` instead.');
             $audienceId = $listId;
         }
+        
+        if ($emailTypeOld !== '') {
+            Craft::$app->deprecator->log(__METHOD__, 'The `emailtype` parameter passed to Mailchimp Subscribe\'s subscribe action is deprecated. Use `email_type` instead.');
+            $emailType = $emailTypeOld;
+        }
+        
+        if ($mcvars !== null) {
+            Craft::$app->deprecator->log(__METHOD__, 'The `mcvars` parameter passed to Mailchimp Subscribe\'s subscribe action is deprecated. Use `merge_fields` instead.');
+            
+            if ($mergeFields === null) {
+                $mergeFields = $mcvars;
+            } 
+        }
+        
+        if ($mcvars !== null && isset($mcvars['interests'])) {
+            Craft::$app->deprecator->log(__METHOD__, 'Passing `interests` through the `mcvars` parameter to Mailchimp Subscribe\'s subscribe action is deprecated. Use `interests` directly instead.');
+            
+            if ($interests === null) {
+                $interests = $mcvars['interests'];
+            } 
+        }
+        
+        $opts = [
+            'email_type' => $emailType,
+            'language' => $language,
+            'merge_fields' => $mergeFields,
+            'marketing_permissions' => $marketingPermissions,
+            'interests' => $interests,
+            'tags' => $tags,
+            'vip' => $vip,
+        ];
 
         // call service method
-        $result = Plugin::$plugin->mailchimpSubscribe->subscribe($email, $audienceId, $emailType, $vars, $language);
+        $result = Plugin::$plugin->mailchimpSubscribe->subscribe($email, $audienceId, $opts);
 
         // if this was an ajax request, return json
         if ($request->getAcceptsJson()) {
@@ -87,8 +128,8 @@ class AudienceController extends Controller
     /**
      * Controller action for unsubscribing an email from a list
      *
-     * @return null|\yii\web\Response
-     * @throws \yii\web\BadRequestHttpException
+     * @return null|Response
+     * @throws BadRequestHttpException
      * @throws DeprecationException
      */
     public function actionUnsubscribe()
@@ -131,8 +172,8 @@ class AudienceController extends Controller
     /**
      * Controller action for deleting an email from a list
      *
-     * @return null|\yii\web\Response
-     * @throws \yii\web\BadRequestHttpException
+     * @return null|Response
+     * @throws BadRequestHttpException
      * @throws DeprecationException
      */
     public function actionDelete()
@@ -144,7 +185,7 @@ class AudienceController extends Controller
         $email = $request->getParam('email', '');
         $audienceId = $request->getParam('audienceId', '');
         $listId = $request->getParam('lid', '');
-        $permanent = $request->getParam('permanent', '');
+        $permanent = $this->parseBoolParam($request->getParam('permanent', ''));
         $redirect = $request->getParam('redirect', '');
         
         if ($audienceId === '' && $listId !== '') {
@@ -153,7 +194,7 @@ class AudienceController extends Controller
         }
 
         // call service method
-        $result = Plugin::$plugin->mailchimpSubscribe->delete($email, $audienceId, $permanent==='on' || $permanent==='yes' || $permanent==='1' || $permanent==='true');
+        $result = Plugin::$plugin->mailchimpSubscribe->delete($email, $audienceId, $permanent);
 
         // if this was an ajax request, return json
         if ($request->getAcceptsJson()) {
@@ -176,8 +217,8 @@ class AudienceController extends Controller
     /**
      * Controller action for checking if a user is subscribed to list
      *
-     * @return null|\yii\web\Response
-     * @throws \yii\web\BadRequestHttpException
+     * @return null|Response
+     * @throws BadRequestHttpException
      * @throws DeprecationException
      */
     public function actionCheckIfSubscribed()
@@ -220,8 +261,8 @@ class AudienceController extends Controller
     /**
      * Controller action for checking if a user is on a list
      *
-     * @return null|\yii\web\Response
-     * @throws \yii\web\BadRequestHttpException
+     * @return null|Response
+     * @throws BadRequestHttpException
      * @throws DeprecationException
      */
     public function actionCheckIfInList()
@@ -259,5 +300,10 @@ class AudienceController extends Controller
         ]);
 
         return null;
+    }
+    
+    
+    private function parseBoolParam($param) {
+        return $param==='on' || $param==='yes' || $param==='1' || $param==='true';
     }
 }
