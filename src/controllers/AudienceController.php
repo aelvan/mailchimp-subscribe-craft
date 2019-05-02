@@ -62,7 +62,7 @@ class AudienceController extends Controller
         $tags = $request->getParam('tags', null);
         $vip = $this->parseBoolParam($request->getParam('vip', false));
         $redirect = $request->getParam('redirect', '');
-        
+
         // deprecated parameters
         $listId = $request->getParam('lid', '');
         $emailTypeOld = $request->getParam('emailtype', '');
@@ -72,28 +72,28 @@ class AudienceController extends Controller
             Craft::$app->deprecator->log(__METHOD__, 'Passing the `lid` parameter to Mailchimp Subscribe\'s subscribe action is deprecated. Use `audienceId` instead.');
             $audienceId = $listId;
         }
-        
+
         if ($emailTypeOld !== '') {
             Craft::$app->deprecator->log(__METHOD__, 'The `emailtype` parameter passed to Mailchimp Subscribe\'s subscribe action is deprecated. Use `email_type` instead.');
             $emailType = $emailTypeOld;
         }
-        
+
         if ($mcvars !== null) {
             Craft::$app->deprecator->log(__METHOD__, 'The `mcvars` parameter passed to Mailchimp Subscribe\'s subscribe action is deprecated. Use `merge_fields` instead.');
-            
+
             if ($mergeFields === null) {
                 $mergeFields = $mcvars;
-            } 
+            }
         }
-        
+
         if ($mcvars !== null && isset($mcvars['interests'])) {
             Craft::$app->deprecator->log(__METHOD__, 'Passing `interests` through the `mcvars` parameter to Mailchimp Subscribe\'s subscribe action is deprecated. Use `interests` directly instead.');
-            
+
             if ($interests === null) {
                 $interests = $mcvars['interests'];
-            } 
+            }
         }
-        
+
         $opts = [
             'email_type' => $emailType,
             'language' => $language,
@@ -142,7 +142,7 @@ class AudienceController extends Controller
         $audienceId = $request->getParam('audienceId', '');
         $listId = $request->getParam('lid', '');
         $redirect = $request->getParam('redirect', '');
-        
+
         if ($audienceId === '' && $listId !== '') {
             Craft::$app->deprecator->log(__METHOD__, 'Passing the `lid` parameter to Mailchimp Subscribe\'s unsubscribe action is deprecated. Use `audienceId` instead.');
             $audienceId = $listId;
@@ -168,7 +168,7 @@ class AudienceController extends Controller
 
         return null;
     }
-    
+
     /**
      * Controller action for deleting an email from a list
      *
@@ -187,7 +187,7 @@ class AudienceController extends Controller
         $listId = $request->getParam('lid', '');
         $permanent = $this->parseBoolParam($request->getParam('permanent', ''));
         $redirect = $request->getParam('redirect', '');
-        
+
         if ($audienceId === '' && $listId !== '') {
             Craft::$app->deprecator->log(__METHOD__, 'Passing the `lid` parameter to Mailchimp Subscribe\'s unsubscribe action is deprecated. Use `audienceId` instead.');
             $audienceId = $listId;
@@ -213,6 +213,49 @@ class AudienceController extends Controller
 
         return null;
     }
+    
+    /**
+     * Controller action for getting a member by email
+     *
+     * @return null|Response
+     * @throws BadRequestHttpException
+     * @throws DeprecationException
+     */
+    public function actionGetMemberByEmail()
+    {
+        $this->requirePostRequest();
+        $request = Craft::$app->getRequest();
+
+        // get post variables
+        $email = $request->getParam('email', '');
+        $audienceId = $request->getParam('audienceId', '');
+        $redirect = $request->getParam('redirect', '');
+
+        // call service method
+        $result = Plugin::$plugin->mailchimpSubscribe->getMemberByEmail($email, $audienceId);
+
+        // if this was an ajax request, return json
+        if ($request->getAcceptsJson()) {
+            return $this->asJson($result);
+        }
+
+        // if a redirect variable was passed, do redirect
+        if ($redirect !== '' && $result !== null) {
+            return $this->redirectToPostedUrl();
+        }
+
+        // TODO : This is temporary, we should return a proper model
+        
+        // set route variables and return
+        Craft::$app->getUrlManager()->setRouteParams([
+            'variables' => ['mailchimpSubscribe' => [
+                'success' => true,
+                'member' => $result
+            ]]
+        ]);
+        
+        return null;
+    }    
 
     /**
      * Controller action for checking if a user is subscribed to list
@@ -236,7 +279,7 @@ class AudienceController extends Controller
             Craft::$app->deprecator->log(__METHOD__, 'Passing the `lid` parameter to Mailchimp Subscribe\'s checkIfSubscribed action is deprecated. Use `audienceId` instead.');
             $audienceId = $listId;
         }
-        
+
         // call service method
         $result = Plugin::$plugin->mailchimpSubscribe->checkIfSubscribed($email, $audienceId);
 
@@ -280,7 +323,7 @@ class AudienceController extends Controller
             Craft::$app->deprecator->log(__METHOD__, 'Passing the `lid` parameter to Mailchimp Subscribe\'s checkIfInList action is deprecated. Use `audienceId` instead.');
             $audienceId = $listId;
         }
-        
+
         // call service method
         $result = Plugin::$plugin->mailchimpSubscribe->checkIfInList($email, $audienceId);
 
@@ -301,9 +344,15 @@ class AudienceController extends Controller
 
         return null;
     }
-    
-    
-    private function parseBoolParam($param) {
-        return $param==='on' || $param==='yes' || $param==='1' || $param==='true';
+
+    /**
+     * Check's if a param is bool'ish.
+     * 
+     * @param $param
+     * @return bool
+     */
+    private function parseBoolParam($param): bool
+    {
+        return $param === 'on' || $param === 'yes' || $param === '1' || $param === 'true';
     }
 }

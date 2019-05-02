@@ -252,6 +252,8 @@ class MailchimpSubscribeService extends Component
      */
     public function checkIfSubscribed($email, $listId)
     {
+        Craft::$app->deprecator->log(__METHOD__, 'The `checkIfSubscribed` service method and controller action has been deprecated. Use `getMemberByEmail` and check `status` instead.');
+        
         // get settings
         $settings = Plugin::$plugin->getSettings();
 
@@ -290,6 +292,8 @@ class MailchimpSubscribeService extends Component
      */
     public function checkIfInList($email, $listId)
     {
+        Craft::$app->deprecator->log(__METHOD__, 'The `checkIfInList` service method and controller action has been deprecated. Use `getMemberByEmail` and check `status` instead.');
+
         // get settings
         $settings = Plugin::$plugin->getSettings();
 
