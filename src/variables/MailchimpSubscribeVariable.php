@@ -63,6 +63,20 @@ class MailchimpSubscribeVariable
     }
 
     /**
+     * Get marketingpermissions by email and audience id
+     *
+     * @param string $email
+     * @param string $id
+     *
+     * @return mixed
+     * @throws DeprecationException
+     */
+    public function getMarketingPermissionsByEmail($email, $id = '')
+    {
+        return Plugin::$plugin->mailchimpSubscribe->getMarketingPermissionsByEmail($email, $id);
+    }
+
+    /**
      * --- Deprecated -----------------------------------------------------------------------------
      */
     
