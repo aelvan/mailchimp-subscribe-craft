@@ -258,6 +258,48 @@ class AudienceController extends Controller
     }    
 
     /**
+     * Controller action for getting an audience by id
+     *
+     * @return null|Response
+     * @throws BadRequestHttpException
+     * @throws DeprecationException
+     */
+    public function actionGetAudienceById()
+    {
+        $this->requirePostRequest();
+        $request = Craft::$app->getRequest();
+
+        // get post variables
+        $audienceId = $request->getParam('audienceId', '');
+        $redirect = $request->getParam('redirect', '');
+
+        // call service method
+        $result = Plugin::$plugin->mailchimpSubscribe->getAudienceById($audienceId);
+
+        // if this was an ajax request, return json
+        if ($request->getAcceptsJson()) {
+            return $this->asJson($result);
+        }
+
+        // if a redirect variable was passed, do redirect
+        if ($redirect !== '' && $result !== null) {
+            return $this->redirectToPostedUrl();
+        }
+
+        // TODO : This is temporary, we should return a proper model
+        
+        // set route variables and return
+        Craft::$app->getUrlManager()->setRouteParams([
+            'variables' => ['mailchimpSubscribe' => [
+                'success' => true,
+                'audience' => $result
+            ]]
+        ]);
+        
+        return null;
+    }    
+
+    /**
      * Controller action for checking if a user is subscribed to list
      *
      * @return null|Response
