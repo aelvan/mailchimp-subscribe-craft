@@ -2,8 +2,6 @@
 /**
  * Mailchimp Subscribe plugin for Craft CMS 3.x
  *
- * Simple Craft plugin for subscribing to a MailChimp list.
- *
  * @link      https://www.vaersaagod.no
  * @copyright Copyright (c) 2017 André Elvan
  */
@@ -25,45 +23,63 @@ class MailchimpSubscribeVariable
     // =========================================================================
 
     /**
+     * Get interest groups for audience
+     *
+     * @param string $id
+     *
+     * @return mixed
+     * @throws DeprecationException
+     */
+    public function getInterestGroups($id = '')
+    {
+        return Plugin::$plugin->mailchimpSubscribe->getInterestGroups($id);
+    }
+    
+    /**
+     * Get member in list by email
+     *
+     * @param string $email
+     * @param string $id
+     *
+     * @return mixed
+     * @throws DeprecationException
+     */
+    public function getMemberByEmail($email, $id = '')
+    {
+        return Plugin::$plugin->mailchimpSubscribe->getMemberByEmail($email, $id);
+    }
+
+    /**
+     * Get audience by id
+     *
+     * @param string $id
+     *
+     * @return mixed
+     * @throws DeprecationException
+     */
+    public function getAudienceById($id = '')
+    {
+        return Plugin::$plugin->mailchimpSubscribe->getAudienceById($id);
+    }
+
+    /**
+     * --- Deprecated -----------------------------------------------------------------------------
+     */
+    
+    /**
      * Get interest groups for list
      *
      * @param string $listId
      *
      * @return mixed
      * @throws DeprecationException
+     * @deprecated Deprecated since version 3.0
      */
     public function getListInterestGroups($listId = '')
     {
         return Plugin::$plugin->mailchimpSubscribe->getListInterestGroups($listId);
     }
-
-    /**
-     * Get member in list by email
-     *
-     * @param string $email
-     * @param string $listId
-     *
-     * @return mixed
-     * @throws DeprecationException
-     */
-    public function getMemberByEmail($email, $listId = '')
-    {
-        return Plugin::$plugin->mailchimpSubscribe->getMemberByEmail($email, $listId);
-    }
-
-    /**
-     * Get list by id
-     *
-     * @param string $listId
-     *
-     * @return mixed
-     * @throws DeprecationException
-     */
-    public function getListById($listId = '')
-    {
-        return Plugin::$plugin->mailchimpSubscribe->getListById($listId);
-    }
-
+    
     /**
      * Check if email is subscribed to list
      *
@@ -72,6 +88,7 @@ class MailchimpSubscribeVariable
      *
      * @return array|mixed
      * @throws DeprecationException
+     * @deprecated Deprecated since version 3.0
      */
     public function checkIfSubscribed($email, $listId = '')
     {
@@ -86,6 +103,7 @@ class MailchimpSubscribeVariable
      *
      * @return array|mixed
      * @throws DeprecationException
+     * @deprecated Deprecated since version 3.0
      */
     public function checkIfInList($email, $listId = '')
     {
