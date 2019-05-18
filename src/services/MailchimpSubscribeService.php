@@ -8,15 +8,17 @@
 
 namespace aelvan\mailchimpsubscribe\services;
 
-use aelvan\mailchimpsubscribe\models\Settings;
 use Craft;
 use craft\base\Component;
 use craft\errors\DeprecationException;
 
+use aelvan\mailchimpsubscribe\MailchimpSubscribe as Plugin;
+use aelvan\mailchimpsubscribe\models\SubscribeResponse;
+use aelvan\mailchimpsubscribe\models\Settings;
+
 use Illuminate\Support\Collection;
 use Mailchimp\Mailchimp;
 
-use aelvan\mailchimpsubscribe\MailchimpSubscribe as Plugin;
 
 /**
  * @author    André Elvan
@@ -32,23 +34,33 @@ class MailchimpSubscribeService extends Component
      * @param string $audienceId
      * @param array|null $opts
      *
-     * @return array
+     * @return SubscribeResponse
      * @throws DeprecationException
      */
-    public function subscribe($email, $audienceId, $opts = null): array
+    public function subscribe($email, $audienceId, $opts = null): SubscribeResponse
     {
         // get settings
         $settings = Plugin::$plugin->getSettings();
 
         if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
-            return $this->getMessage(1000, $email, $opts, Craft::t('mailchimp-subscribe', 'Invalid email'));
+            return new SubscribeResponse([
+                'success' => false,
+                'errorCode' => '1000',
+                'message' => Craft::t('mailchimp-subscribe', 'Invalid email'),
+                'values' => array_merge(['email' => $email], $opts ?? [])
+            ]);
         }
 
         // get list id string
         $audienceId = $this->prepAudienceId($audienceId);
 
         if ($settings->apiKey === '' || $audienceId === '') { // error, no API key or list id
-            return $this->getMessage(2000, $email, $opts, Craft::t('mailchimp-subscribe', 'API Key or Audience ID not supplied. Check your settings.'));
+            return new SubscribeResponse([
+                'success' => false,
+                'errorCode' => '2000',
+                'message' => Craft::t('mailchimp-subscribe', 'API Key or Audience ID not supplied. Check your settings.'),
+                'values' => array_merge(['email' => $email], $opts ?? [])
+            ]);
         }
 
         // create a new api instance, and subscribe
@@ -78,7 +90,7 @@ class MailchimpSubscribeService extends Component
         if ($member && !empty($marketingPermissions) && isset($member['marketing_permissions'])) {
             $marketingPermissions = $this->prepMarketingPermissions($member, $marketingPermissions);
         }
-
+        
         // Build the post variables
         $postVars = [
             'status_if_new' => $settings->doubleOptIn ? 'pending' : 'subscribed',
@@ -105,30 +117,47 @@ class MailchimpSubscribeService extends Component
         }
 
         if (!empty($marketingPermissions)) {
-            $marketingObject = [];
+            $marketingPostObject = [];
 
             foreach ($marketingPermissions as $marketingPermissionId => $marketingPermissionValue) {
-                $marketingObject[] = ['marketing_permission_id' => $marketingPermissionId, 'enabled' => $marketingPermissionValue];
+                $marketingPostObject[] = ['marketing_permission_id' => $marketingPermissionId, 'enabled' => $marketingPermissionValue];
             }
 
-            $postVars['marketing_permissions'] = $marketingObject;
-            $opts['marketing_permissions'] = $marketingObject;
+            $postVars['marketing_permissions'] = $marketingPostObject;
+            $opts['marketing_permissions'] = $marketingPermissions;
         }
 
         // Subscribe
         try {
             $result = $mc->request('lists/' . $audienceId . '/members/' . md5(strtolower($email)), $postVars, 'PUT');
+            
+            if (isset($result['_links'])) {
+                unset($result['_links']);
+            }
         } catch (\Exception $e) {
             $message = $e->getMessage();
             $errorObj = json_decode($message, false);
 
             if (JSON_ERROR_NONE !== json_last_error()) {
                 Craft::error('An error occured when trying to subscribe email `' . $email . '`: ' . $message, __METHOD__);
-                return $this->getMessage($errorObj->status ?? '9999', $email, $opts, Craft::t('mailchimp-subscribe', $message));
+                
+                return new SubscribeResponse([
+                    'success' => false,
+                    'errorCode' => $errorObj->status ?? '9999',
+                    'message' => Craft::t('mailchimp-subscribe', $message),
+                    'values' => array_merge(['email' => $email], $opts ?? [])
+                ]);
             }
 
             Craft::error('An error occured when trying to subscribe email `' . $email . '`: ' . $errorObj->title . ' (' . $errorObj->status . ')', __METHOD__);
-            return $this->getMessage($errorObj->status, $email, $opts, Craft::t('mailchimp-subscribe', $errorObj->title));
+
+            return new SubscribeResponse([
+                'response' => $errorObj,
+                'success' => false,
+                'errorCode' => $errorObj->status,
+                'message' => Craft::t('mailchimp-subscribe', $errorObj->title),
+                'values' => array_merge(['email' => $email], $opts ?? [])
+            ]);
         }
 
         // Add tags to member if they were submitted.
@@ -141,7 +170,13 @@ class MailchimpSubscribeService extends Component
             }
         }
 
-        return $this->getMessage(200, $email, $opts, Craft::t('mailchimp-subscribe', 'Subscribed successfully'), true);
+        return new SubscribeResponse([
+            'response' => $result,
+            'success' => true,
+            'errorCode' => 200,
+            'message' => Craft::t('mailchimp-subscribe', 'Subscribed successfully'),
+            'values' => array_merge(['email' => $email], $opts ?? [])
+        ]);
     }
 
     /**
@@ -398,7 +433,7 @@ class MailchimpSubscribeService extends Component
 
     /**
      * Gets marketing permissions from member by email
-     * 
+     *
      * @param $email
      * @param $audienceId
      * @return array|null
