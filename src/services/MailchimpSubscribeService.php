@@ -437,6 +437,7 @@ class MailchimpSubscribeService extends Component
      */
     public function getListInterestGroups($listId = '')
     {
+        Craft::$app->deprecator->log(__METHOD__, 'The `getListInterestGroups` template variable and service method is deprecated. Use `getInterestGroups` instead.');
         return $this->getInterestGroups($listId);
     }
 
