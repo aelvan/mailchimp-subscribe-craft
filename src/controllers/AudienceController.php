@@ -8,6 +8,7 @@
 
 namespace aelvan\mailchimpsubscribe\controllers;
 
+use aelvan\mailchimpsubscribe\models\MemberResponse;
 use Craft;
 use craft\web\Controller;
 use craft\errors\DeprecationException;
@@ -232,9 +233,14 @@ class AudienceController extends Controller
         // call service method
         $result = Plugin::$plugin->mailchimpSubscribe->getMemberByEmail($email, $audienceId);
 
+        $memberResponse = new MemberResponse([
+            'success' => $result !== null,
+            'response' => $result
+        ]);
+
         // if this was an ajax request, return json
         if ($request->getAcceptsJson()) {
-            return $this->asJson($result);
+            return $this->asJson($memberResponse);
         }
 
         // if a redirect variable was passed, do redirect
@@ -242,14 +248,9 @@ class AudienceController extends Controller
             return $this->redirectToPostedUrl();
         }
 
-        // TODO : This is temporary, we should return a proper model
-        
         // set route variables and return
         Craft::$app->getUrlManager()->setRouteParams([
-            'variables' => ['mailchimpSubscribe' => [
-                'success' => true,
-                'member' => $result
-            ]]
+            'variables' => ['mailchimpSubscribe' => $memberResponse]
         ]);
         
         return null;
@@ -297,6 +298,10 @@ class AudienceController extends Controller
         return null;
     }    
 
+    /**
+     * --- Deprecated -----------------------------------------------------------------------------
+     */
+    
     /**
      * Controller action for checking if a user is subscribed to list
      *
@@ -385,6 +390,10 @@ class AudienceController extends Controller
         return null;
     }
 
+    /**
+     * --- Private methods --------------------------------------------------------------------------------------
+     */
+    
     /**
      * Check's if a param is bool'ish.
      * 
