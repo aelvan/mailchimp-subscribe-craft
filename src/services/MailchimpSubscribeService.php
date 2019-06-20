@@ -241,7 +241,7 @@ class MailchimpSubscribeService extends Component
                 ]);
             }
 
-            Craft::error('An error occured when trying to subscribe email `' . $email . '`: ' . $errorObj->title . ' (' . $errorObj->status . ')', __METHOD__);
+            Craft::error('An error occured when trying to unsubscribe email `' . $email . '`: ' . $errorObj->title . ' (' . $errorObj->status . ')', __METHOD__);
             
             return new SubscribeResponse([
                 'action' => 'unsubscribe',
@@ -318,7 +318,7 @@ class MailchimpSubscribeService extends Component
             $errorObj = json_decode($message, false);
 
             if (JSON_ERROR_NONE !== json_last_error()) {
-                Craft::error('An error occured when trying to unsubscribe email `' . $email . '`: ' . $message, __METHOD__);
+                Craft::error('An error occured when trying to delete email `' . $email . '`: ' . $message, __METHOD__);
 
                 return new SubscribeResponse([
                     'action' => 'delete',
@@ -329,7 +329,7 @@ class MailchimpSubscribeService extends Component
                 ]);
             }
 
-            Craft::error('An error occured when trying to subscribe email `' . $email . '`: ' . $errorObj->title . ' (' . $errorObj->status . ')', __METHOD__);
+            Craft::error('An error occured when trying to delete email `' . $email . '`: ' . $errorObj->title . ' (' . $errorObj->status . ')', __METHOD__);
 
             return new SubscribeResponse([
                 'action' => 'delete',
