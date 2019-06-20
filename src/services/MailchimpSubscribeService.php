@@ -185,23 +185,35 @@ class MailchimpSubscribeService extends Component
      * @param string $email
      * @param string $audienceId
      *
-     * @return array
+     * @return SubscribeResponse
      * @throws DeprecationException
      */
-    public function unsubscribe($email, $audienceId): array
+    public function unsubscribe($email, $audienceId): SubscribeResponse
     {
         // get settings
         $settings = Plugin::$plugin->getSettings();
 
         if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
-            return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'Invalid email'));
+            return new SubscribeResponse([
+                'action' => 'unsubscribe',
+                'success' => false,
+                'errorCode' => '1000',
+                'message' => Craft::t('mailchimp-subscribe', 'Invalid email'),
+                'values' => ['email' => $email]
+            ]);
         }
 
         // get list id string
         $audienceId = $this->prepAudienceId($audienceId);
 
         if ($settings->apiKey === '' || $audienceId === '') { // error, no API key or list id
-            return $this->getMessage(2000, $email, [], Craft::t('mailchimp-subscribe', 'API Key or Audience ID not supplied. Check your settings.'));
+            return new SubscribeResponse([
+                'action' => 'unsubscribe',
+                'success' => false,
+                'errorCode' => '2000',
+                'message' => Craft::t('mailchimp-subscribe', 'API Key or Audience ID not supplied. Check your settings.'),
+                'values' => ['email' => $email]
+            ]);
         }
 
         // create a new api instance, and subscribe
@@ -209,20 +221,46 @@ class MailchimpSubscribeService extends Component
 
         try {
             $result = $mc->request('lists/' . $audienceId . '/members/' . md5(strtolower($email)), ['status' => 'unsubscribed'], 'PATCH');
+
+            if (isset($result['_links'])) {
+                unset($result['_links']);
+            }
         } catch (\Exception $e) { // an error occured
             $message = $e->getMessage();
             $errorObj = json_decode($message, false);
 
             if (JSON_ERROR_NONE !== json_last_error()) {
                 Craft::error('An error occured when trying to unsubscribe email `' . $email . '`: ' . $message, __METHOD__);
-                return $this->getMessage($errorObj->status ?? '9999', $email, [], Craft::t('mailchimp-subscribe', $message));
+                
+                return new SubscribeResponse([
+                    'action' => 'unsubscribe',
+                    'success' => false,
+                    'errorCode' => $errorObj->status ?? '9999',
+                    'message' => Craft::t('mailchimp-subscribe', $message),
+                    'values' => ['email' => $email]
+                ]);
             }
 
             Craft::error('An error occured when trying to subscribe email `' . $email . '`: ' . $errorObj->title . ' (' . $errorObj->status . ')', __METHOD__);
-            return $this->getMessage($errorObj->status, $email, [], Craft::t('mailchimp-subscribe', $errorObj->title));
+            
+            return new SubscribeResponse([
+                'action' => 'unsubscribe',
+                'response' => $errorObj,
+                'success' => false,
+                'errorCode' => $errorObj->status,
+                'message' => Craft::t('mailchimp-subscribe', $errorObj->title),
+                'values' => ['email' => $email]
+            ]);
         }
 
-        return $this->getMessage(200, $email, [], Craft::t('mailchimp-subscribe', 'Unsubscribed successfully'), true);
+        return new SubscribeResponse([
+            'action' => 'unsubscribe',
+            'response' => $result,
+            'success' => true,
+            'errorCode' => 200,
+            'message' => Craft::t('mailchimp-subscribe', 'Unsubscribed successfully'),
+            'values' => ['email' => $email]
+        ]);
     }
 
     /**
@@ -231,23 +269,35 @@ class MailchimpSubscribeService extends Component
      * @param string $email
      * @param string $audienceId
      * @param bool $permanent
-     * @return array
+     * @return SubscribeResponse
      * @throws DeprecationException
      */
-    public function delete($email, $audienceId, $permanent = false): array
+    public function delete($email, $audienceId, $permanent = false): SubscribeResponse
     {
         // get settings
         $settings = Plugin::$plugin->getSettings();
 
         if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
-            return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'Invalid email'));
+            return new SubscribeResponse([
+                'action' => 'delete',
+                'success' => false,
+                'errorCode' => '1000',
+                'message' => Craft::t('mailchimp-subscribe', 'Invalid email'),
+                'values' => ['email' => $email]
+            ]);
         }
 
         // get list id string
         $audienceId = $this->prepAudienceId($audienceId);
 
         if ($settings->apiKey === '' || $audienceId === '') { // error, no API key or list id
-            return $this->getMessage(2000, $email, [], Craft::t('mailchimp-subscribe', 'API Key or Audience ID not supplied. Check your settings.'));
+            return new SubscribeResponse([
+                'action' => 'delete',
+                'success' => false,
+                'errorCode' => '2000',
+                'message' => Craft::t('mailchimp-subscribe', 'API Key or Audience ID not supplied. Check your settings.'),
+                'values' => ['email' => $email]
+            ]);
         }
 
         // create a new api instance, and subscribe
@@ -259,20 +309,46 @@ class MailchimpSubscribeService extends Component
             } else {
                 $result = $mc->request('lists/' . $audienceId . '/members/' . md5(strtolower($email)), [], 'DELETE');
             }
+            
+            if (isset($result['_links'])) {
+                unset($result['_links']);
+            }
         } catch (\Exception $e) { // an error occured
             $message = $e->getMessage();
             $errorObj = json_decode($message, false);
 
             if (JSON_ERROR_NONE !== json_last_error()) {
                 Craft::error('An error occured when trying to unsubscribe email `' . $email . '`: ' . $message, __METHOD__);
-                return $this->getMessage($errorObj->status ?? '9999', $email, [], Craft::t('mailchimp-subscribe', $message));
+
+                return new SubscribeResponse([
+                    'action' => 'delete',
+                    'success' => false,
+                    'errorCode' => $errorObj->status ?? '9999',
+                    'message' => Craft::t('mailchimp-subscribe', $message),
+                    'values' => ['email' => $email]
+                ]);
             }
 
             Craft::error('An error occured when trying to subscribe email `' . $email . '`: ' . $errorObj->title . ' (' . $errorObj->status . ')', __METHOD__);
-            return $this->getMessage($errorObj->status, $email, [], Craft::t('mailchimp-subscribe', $errorObj->title));
+
+            return new SubscribeResponse([
+                'action' => 'delete',
+                'response' => $errorObj,
+                'success' => false,
+                'errorCode' => $errorObj->status,
+                'message' => Craft::t('mailchimp-subscribe', $errorObj->title),
+                'values' => ['email' => $email]
+            ]);
         }
 
-        return $this->getMessage(200, $email, [], Craft::t('mailchimp-subscribe', 'Deleted successfully'), true);
+        return new SubscribeResponse([
+            'action' => 'delete',
+            'response' => $result,
+            'success' => true,
+            'errorCode' => 200,
+            'message' => Craft::t('mailchimp-subscribe', 'Deleted successfully'),
+            'values' => ['email' => $email]
+        ]);
     }
 
     /**
