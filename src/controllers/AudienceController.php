@@ -8,6 +8,7 @@
 
 namespace aelvan\mailchimpsubscribe\controllers;
 
+use aelvan\mailchimpsubscribe\models\AudienceResponse;
 use aelvan\mailchimpsubscribe\models\MemberResponse;
 use Craft;
 use craft\web\Controller;
@@ -275,9 +276,14 @@ class AudienceController extends Controller
         // call service method
         $result = Plugin::$plugin->mailchimpSubscribe->getAudienceById($audienceId);
 
+        $audienceResponse = new AudienceResponse([
+            'success' => $result !== null,
+            'response' => $result
+        ]);
+        
         // if this was an ajax request, return json
         if ($request->getAcceptsJson()) {
-            return $this->asJson($result);
+            return $this->asJson($audienceResponse);
         }
 
         // if a redirect variable was passed, do redirect
@@ -285,14 +291,9 @@ class AudienceController extends Controller
             return $this->redirectToPostedUrl();
         }
 
-        // TODO : This is temporary, we should return a proper model
-        
         // set route variables and return
         Craft::$app->getUrlManager()->setRouteParams([
-            'variables' => ['mailchimpSubscribe' => [
-                'success' => true,
-                'audience' => $result
-            ]]
+            'variables' => ['mailchimpSubscribe' => $audienceResponse]
         ]);
         
         return null;
