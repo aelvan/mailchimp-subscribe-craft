@@ -446,7 +446,8 @@ class MailchimpSubscribeService extends Component
         $audienceId = $this->prepAudienceId($audienceId);
 
         if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
-            return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'Invalid email'));
+            Craft::error('Invalid email', __METHOD__);
+            return null;
         }
 
         // check if we got an api key and id
@@ -667,6 +668,32 @@ class MailchimpSubscribeService extends Component
 
         return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'The email address does not exist on this list'), false);
     }
+    
+    /**
+     * Creates return message object
+     *
+     * @param string|int $errorcode
+     * @param string $email
+     * @param array $vars
+     * @param string $message
+     * @param bool $success
+     *
+     * @return array
+     * @author Martin Blackburn
+     * @deprecated Deprecated since version 3.0
+     */
+    private function getMessage($errorcode, $email, $vars, $message = '', $success = false): array
+    {
+        return [
+            'success' => $success,
+            'errorCode' => $errorcode,
+            'message' => $message,
+            'values' => [
+                'email' => $email,
+                'vars' => $vars
+            ]
+        ];
+    }
 
     
     /**
@@ -805,32 +832,6 @@ class MailchimpSubscribeService extends Component
         }
 
         return false;
-    }
-
-
-    /**
-     * Creates return message object
-     *
-     * @param string|int $errorcode
-     * @param string $email
-     * @param array $vars
-     * @param string $message
-     * @param bool $success
-     *
-     * @return array
-     * @author Martin Blackburn
-     */
-    private function getMessage($errorcode, $email, $vars, $message = '', $success = false): array
-    {
-        return [
-            'success' => $success,
-            'errorCode' => $errorcode,
-            'message' => $message,
-            'values' => [
-                'email' => $email,
-                'vars' => $vars
-            ]
-        ];
     }
 
     /**
