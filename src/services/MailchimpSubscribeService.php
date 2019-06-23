@@ -350,83 +350,7 @@ class MailchimpSubscribeService extends Component
             'values' => ['email' => $email]
         ]);
     }
-
-    /**
-     * Check if email is subscribed to one or more lists.
-     *
-     * @param string $email
-     * @param string $audienceId
-     *
-     * @return array|mixed
-     * @throws DeprecationException
-     * @deprecated Deprecated since version 3.0
-     */
-    public function checkIfSubscribed($email, $audienceId)
-    {
-        Craft::$app->deprecator->log(__METHOD__, 'The `checkIfSubscribed` service method and controller action has been deprecated. Use `getMemberByEmail` and check `status` instead.');
-
-        // get settings
-        $settings = Plugin::$plugin->getSettings();
-
-        if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
-            return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'Invalid email'));
-        }
-
-        $audienceId = $this->prepAudienceId($audienceId);
-
-        // check if we got an api key and a list id
-        if ($settings->apiKey === '' || $audienceId === '') { // error, no API key or list id
-            return $this->getMessage(2000, $email, [], Craft::t('mailchimp-subscribe', 'API Key or Audience ID not supplied. Check your settings.'));
-        }
-
-        $member = $this->getMemberByEmail($email, $audienceId);
-
-        if ($member) {
-            if ($member['status'] === 'subscribed') {
-                return $this->getMessage(200, $email, [], Craft::t('mailchimp-subscribe', 'The email address exists on this list'), true);
-            }
-
-            return $this->getMessage(200, $email, [], Craft::t('mailchimp-subscribe', 'The email address was unsubscribed from this list'), false);
-        }
-
-        return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'The email address does not exist on this list'), false);
-    }
-
-    /**
-     * Check if email exists in one or more lists.
-     *
-     * @param string $email
-     * @param string $listId
-     *
-     * @return array|mixed
-     * @throws DeprecationException
-     * @deprecated Deprecated since version 3.0
-     */
-    public function checkIfInList($email, $listId)
-    {
-        Craft::$app->deprecator->log(__METHOD__, 'The `checkIfInList` service method and controller action has been deprecated. Use `getMemberByEmail` and check `status` instead.');
-
-        // get settings
-        $settings = Plugin::$plugin->getSettings();
-
-        if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
-            return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'Invalid email'));
-        }
-
-        $listId = $this->prepAudienceId($listId);
-
-        // check if we got an api key and a list id
-        if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
-            return $this->getMessage(2000, $email, [], Craft::t('mailchimp-subscribe', 'API Key or Audience ID not supplied. Check your settings.'));
-        }
-
-        if ($this->getMemberByEmail($email, $listId)) {
-            return $this->getMessage(200, $email, [], Craft::t('mailchimp-subscribe', 'The email address exists on this list'), true);
-        }
-
-        return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'The email address does not exist on this list'), false);
-    }
-
+    
     /**
      * Return member object by email
      *
@@ -541,23 +465,11 @@ class MailchimpSubscribeService extends Component
     }
 
     /**
-     * @param string $listId
-     * @return array
-     * @throws DeprecationException
-     * @deprecated Deprecated since version 3.0
-     */
-    public function getListInterestGroups($listId = '')
-    {
-        Craft::$app->deprecator->log(__METHOD__, 'The `getListInterestGroups` template variable and service method is deprecated. Use `getInterestGroups` instead.');
-        return $this->getInterestGroups($listId);
-    }
-
-    /**
      * Returns interest groups in audience by id
      *
      * @param string $audienceId
      *
-     * @return array
+     * @return array|null
      * @throws DeprecationException
      */
     public function getInterestGroups($audienceId = '')
@@ -568,10 +480,7 @@ class MailchimpSubscribeService extends Component
         // check if we got an api key and a list id
         if ($settings->apiKey === '' || $audienceId === '') { // error, no API key or list id
             Craft::error('API Key or Audience ID not supplied. Check your settings.', __METHOD__);
-            return [
-                'success' => false,
-                'message' => 'API Key or Audience ID not supplied. Check your settings.'
-            ];
+            return null;
         }
 
         // create a new api instance
@@ -603,27 +512,19 @@ class MailchimpSubscribeService extends Component
                 $return[] = $categoryData;
             }
 
+            return $return;
 
-            return [
-                'success' => true,
-                'groups' => $return
-            ];
         } catch (\Exception $e) { // subscriber didn't exist
             $message = $e->getMessage();
             $msg = json_decode($message, false);
 
             if (JSON_ERROR_NONE !== json_last_error()) {
                 Craft::error('An error occured when trying to get list interests: ' . $message, __METHOD__);
-                return [
-                    'success' => false,
-                    'message' => $message
-                ];
+                return null;
             }
 
-            return [
-                'success' => false,
-                'message' => $msg->detail
-            ];
+            Craft::error('An error occured when trying to get list interests: ' . $msg->detail, __METHOD__);
+            return null;
         }
     }
 
@@ -673,8 +574,101 @@ class MailchimpSubscribeService extends Component
 
         return $result;
     }
+    
 
+    /**
+     * --- Deprecated methods --------------------------------------------------------------------------------------
+     */
 
+    /**
+     * @param string $listId
+     * @return array|mixed
+     * @throws DeprecationException
+     * @deprecated Deprecated since version 3.0
+     */
+    public function getListInterestGroups($listId = '')
+    {
+        Craft::$app->deprecator->log(__METHOD__, 'The `getListInterestGroups` template variable and service method is deprecated. Use `getInterestGroups` instead.');
+        return $this->getInterestGroups($listId);
+    }
+    
+    /**
+     * Check if email is subscribed to one or more lists.
+     *
+     * @param string $email
+     * @param string $audienceId
+     *
+     * @return array|mixed
+     * @throws DeprecationException
+     * @deprecated Deprecated since version 3.0
+     */
+    public function checkIfSubscribed($email, $audienceId)
+    {
+        Craft::$app->deprecator->log(__METHOD__, 'The `checkIfSubscribed` service method and controller action has been deprecated. Use `getMemberByEmail` and check `status` instead.');
+
+        // get settings
+        $settings = Plugin::$plugin->getSettings();
+
+        if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
+            return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'Invalid email'));
+        }
+
+        $audienceId = $this->prepAudienceId($audienceId);
+
+        // check if we got an api key and a list id
+        if ($settings->apiKey === '' || $audienceId === '') { // error, no API key or list id
+            return $this->getMessage(2000, $email, [], Craft::t('mailchimp-subscribe', 'API Key or Audience ID not supplied. Check your settings.'));
+        }
+
+        $member = $this->getMemberByEmail($email, $audienceId);
+
+        if ($member) {
+            if ($member['status'] === 'subscribed') {
+                return $this->getMessage(200, $email, [], Craft::t('mailchimp-subscribe', 'The email address exists on this list'), true);
+            }
+
+            return $this->getMessage(200, $email, [], Craft::t('mailchimp-subscribe', 'The email address was unsubscribed from this list'), false);
+        }
+
+        return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'The email address does not exist on this list'), false);
+    }
+
+    /**
+     * Check if email exists in one or more lists.
+     *
+     * @param string $email
+     * @param string $listId
+     *
+     * @return array|mixed
+     * @throws DeprecationException
+     * @deprecated Deprecated since version 3.0
+     */
+    public function checkIfInList($email, $listId)
+    {
+        Craft::$app->deprecator->log(__METHOD__, 'The `checkIfInList` service method and controller action has been deprecated. Use `getMemberByEmail` and check `status` instead.');
+
+        // get settings
+        $settings = Plugin::$plugin->getSettings();
+
+        if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
+            return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'Invalid email'));
+        }
+
+        $listId = $this->prepAudienceId($listId);
+
+        // check if we got an api key and a list id
+        if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
+            return $this->getMessage(2000, $email, [], Craft::t('mailchimp-subscribe', 'API Key or Audience ID not supplied. Check your settings.'));
+        }
+
+        if ($this->getMemberByEmail($email, $listId)) {
+            return $this->getMessage(200, $email, [], Craft::t('mailchimp-subscribe', 'The email address exists on this list'), true);
+        }
+
+        return $this->getMessage(1000, $email, [], Craft::t('mailchimp-subscribe', 'The email address does not exist on this list'), false);
+    }
+
+    
     /**
      * --- Private methods --------------------------------------------------------------------------------------
      */
