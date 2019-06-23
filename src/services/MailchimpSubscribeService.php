@@ -68,6 +68,7 @@ class MailchimpSubscribeService extends Component
         $member = $this->getMemberByEmail($email, $audienceId);
 
         // convert interest groups if present
+        /*
         $interests = [];
         if (isset($opts['interests']) && is_array($opts['interests']) && count($opts['interests'])) {
             foreach ($opts['interests'] as $interest) {
@@ -78,7 +79,13 @@ class MailchimpSubscribeService extends Component
         if ($member && !empty($interests) && isset($member['interests'])) {
             $interests = $this->prepInterests($audienceId, $member, $interests);
         }
+        */
 
+        $interests = [];
+        if (isset($opts['interests']) && $opts['interests'] !== null) {
+            $interests = $this->prepInterests($audienceId, $opts['interests']);
+        }
+        
         // marketing permissions
         $marketingPermissions = [];
         if (isset($opts['marketing_permissions']) && is_array($opts['marketing_permissions']) && count($opts['marketing_permissions'])) {
@@ -734,34 +741,40 @@ class MailchimpSubscribeService extends Component
     }
 
     /**
-     * Removes existing interests in groups of type radio or dropdown, and merges all other interests
+     * Preps interests. For groups that have been set in front-end form, existing interests are reset.
      *
-     * @param $audienceId
-     * @param $member
-     * @param $interests
+     * @param string $audienceId
+     * @param array|string $interests
      *
      * @return array
      * @throws DeprecationException
      */
-    private function prepInterests($audienceId, $member, $interests): array
+    private function prepInterests($audienceId, $interests): array
     {
         $interestGroupsResult = $this->getInterestGroups($audienceId);
-        $memberInterests = (array)$member['interests'];
-
-        // reset any id's in member object that belong to a select or radio group, if there is an id in interests array in that group.
-        foreach ($interestGroupsResult['groups'] as $group) {
-            if ($group['type'] === 'radio' || $group['type'] === 'dropdown') {
-                if ($this->interestsHasIdInGroup($interests, $group['interests'])) {
-
-                    // reset all member interests for group interests
-                    foreach ($group['interests'] as $groupInterest) {
-                        $memberInterests[$groupInterest['id']] = false;
+        $r = [];
+        
+        // Reset all interests 
+        foreach ($interestGroupsResult as $group) {
+            if (isset($interests[$group['title']])) {
+                foreach ($group['interests'] as $groupInterest) {
+                    $r[$groupInterest['id']] = false;
+                }
+            }
+        }
+        
+        // add configures interests
+        if (is_array($interests)) {
+            foreach ($interests as $interestGroup) {
+                if (is_array($interestGroup)) {
+                    foreach ($interestGroup as $interest) {
+                        $r[$interest] = true;
                     }
                 }
             }
         }
-
-        return array_merge($memberInterests, $interests);
+        
+        return $r;
     }
 
     /**
@@ -812,28 +825,7 @@ class MailchimpSubscribeService extends Component
 
         return $r;
     }
-
-    /**
-     * Check if there is an id in the posted interests, in a groups interests
-     *
-     * @param array $interests
-     * @param array $groupInterests
-     *
-     * @return bool
-     */
-    private function interestsHasIdInGroup($interests, $groupInterests): bool
-    {
-        foreach ($groupInterests as $groupInterest) {
-            foreach ($interests as $interestId => $interestVal) {
-                if ($interestId === $groupInterest['id']) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
+    
     /**
      * Validate an email address.
      * Provide email address (raw input)
