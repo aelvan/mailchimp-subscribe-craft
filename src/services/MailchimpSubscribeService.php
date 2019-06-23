@@ -103,8 +103,8 @@ class MailchimpSubscribeService extends Component
             $postVars['language'] = $opts['language'];
         }
 
-        if ($opts['vip'] === true) {
-            $postVars['vip'] = true;
+        if ($opts['vip'] !== null) {
+            $postVars['vip'] = $opts['vip'];
         }
 
         if (isset($opts['merge_fields']) && is_array($opts['merge_fields']) && count($opts['merge_fields']) > 0) {

@@ -60,9 +60,13 @@ class AudienceController extends Controller
         $marketingPermissions = $request->getParam('marketing_permissions', null);
         $interests = $request->getParam('interests', null);
         $tags = $request->getParam('tags', null);
-        $vip = $this->parseBoolParam($request->getParam('vip', false));
+        $vip = $request->getParam('vip', false);
         $redirect = $request->getParam('redirect', '');
-
+        
+        if ($vip !== null) {
+            $vip = $this->parseBoolParam($vip);
+        }
+        
         // deprecated parameters
         $listId = $request->getParam('lid', '');
         $emailTypeOld = $request->getParam('emailtype', '');
@@ -103,7 +107,7 @@ class AudienceController extends Controller
             'tags' => $tags,
             'vip' => $vip,
         ];
-
+        
         // call service method
         $result = Plugin::$plugin->mailchimpSubscribe->subscribe($email, $audienceId, $opts);
 
