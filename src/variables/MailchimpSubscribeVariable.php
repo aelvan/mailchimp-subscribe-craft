@@ -23,20 +23,7 @@ class MailchimpSubscribeVariable
     // =========================================================================
 
     /**
-     * Get interest groups for audience
-     *
-     * @param string $id
-     *
-     * @return mixed
-     * @throws DeprecationException
-     */
-    public function getInterestGroups($id = '')
-    {
-        return Plugin::$plugin->mailchimpSubscribe->getInterestGroups($id);
-    }
-    
-    /**
-     * Get member in list by email
+     * Get member in audience by email
      *
      * @param string $email
      * @param string $id
@@ -50,6 +37,21 @@ class MailchimpSubscribeVariable
     }
 
     /**
+     * Get member tags by email
+     *
+     * @param string $email
+     * @param string $id
+     *
+     * @return mixed
+     * @throws DeprecationException
+     */
+    public function getMemberTagsByEmail($email, $id = '')
+    {
+        return Plugin::$plugin->mailchimpSubscribe->getMemberTagsByEmail($email, $id);
+    }
+    
+    
+    /**
      * Get audience by id
      *
      * @param string $id
@@ -61,7 +63,20 @@ class MailchimpSubscribeVariable
     {
         return Plugin::$plugin->mailchimpSubscribe->getAudienceById($id);
     }
-
+    
+    /**
+     * Get interest groups for audience
+     *
+     * @param string $id
+     *
+     * @return mixed
+     * @throws DeprecationException
+     */
+    public function getInterestGroups($id = '')
+    {
+        return Plugin::$plugin->mailchimpSubscribe->getInterestGroups($id);
+    }
+    
     /**
      * Get marketingpermissions by email and audience id
      *

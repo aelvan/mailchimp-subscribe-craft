@@ -90,7 +90,7 @@ class MailchimpSubscribeService extends Component
         if ($member && !empty($marketingPermissions) && isset($member['marketing_permissions'])) {
             $marketingPermissions = $this->prepMarketingPermissions($member, $marketingPermissions);
         }
-        
+
         // Build the post variables
         $postVars = [
             'status_if_new' => $settings->doubleOptIn ? 'pending' : 'subscribed',
@@ -130,7 +130,7 @@ class MailchimpSubscribeService extends Component
         // Subscribe
         try {
             $result = $mc->request('lists/' . $audienceId . '/members/' . md5(strtolower($email)), $postVars, 'PUT');
-            
+
             if (isset($result['_links'])) {
                 unset($result['_links']);
             }
@@ -140,7 +140,7 @@ class MailchimpSubscribeService extends Component
 
             if (JSON_ERROR_NONE !== json_last_error()) {
                 Craft::error('An error occured when trying to subscribe email `' . $email . '`: ' . $message, __METHOD__);
-                
+
                 return new SubscribeResponse([
                     'success' => false,
                     'errorCode' => $errorObj->status ?? '9999',
@@ -231,7 +231,7 @@ class MailchimpSubscribeService extends Component
 
             if (JSON_ERROR_NONE !== json_last_error()) {
                 Craft::error('An error occured when trying to unsubscribe email `' . $email . '`: ' . $message, __METHOD__);
-                
+
                 return new SubscribeResponse([
                     'action' => 'unsubscribe',
                     'success' => false,
@@ -242,7 +242,7 @@ class MailchimpSubscribeService extends Component
             }
 
             Craft::error('An error occured when trying to unsubscribe email `' . $email . '`: ' . $errorObj->title . ' (' . $errorObj->status . ')', __METHOD__);
-            
+
             return new SubscribeResponse([
                 'action' => 'unsubscribe',
                 'response' => $errorObj,
@@ -309,7 +309,7 @@ class MailchimpSubscribeService extends Component
             } else {
                 $result = $mc->request('lists/' . $audienceId . '/members/' . md5(strtolower($email)), [], 'DELETE');
             }
-            
+
             if (isset($result['_links'])) {
                 unset($result['_links']);
             }
@@ -625,6 +625,53 @@ class MailchimpSubscribeService extends Component
                 'message' => $msg->detail
             ];
         }
+    }
+
+    /**
+     * Returns member tags from member by email
+     * 
+     * @param string $email
+     * @param string $audienceId
+     * @return Collection|null
+     * @throws DeprecationException
+     */
+    public function getMemberTagsByEmail($email, $audienceId = '')
+    {
+        $settings = Plugin::$plugin->getSettings();
+        $audienceId = $this->prepAudienceId($audienceId);
+
+        if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
+            Craft::error('Invalid email', __METHOD__);
+            return null;
+
+        }
+
+        // check if we got an api key and a list id
+        if ($settings->apiKey === '' || $audienceId === '') { // error, no API key or list id
+            Craft::error('API Key or Audience ID not supplied. Check your settings.', __METHOD__);
+            return null;
+        }
+
+        // create a new api instance
+        $mc = new Mailchimp($settings->apiKey);
+
+        try {
+            /** @var Collection $result */
+            $result = $mc->request('lists/' . $audienceId . '/members/' . md5(strtolower($email)) . '/tags');
+        } catch (\Exception $e) { // subscriber didn't exist
+            $message = $e->getMessage();
+            $msg = json_decode($message, false);
+
+            if (JSON_ERROR_NONE !== json_last_error()) {
+                Craft::error('An error occured when trying to get list interests: ' . $message, __METHOD__);
+                return null;
+            }
+
+            Craft::error('An error occured when trying to get list interests: ' . $msg->detail, __METHOD__);
+            return null;
+        }
+
+        return $result;
     }
 
 
