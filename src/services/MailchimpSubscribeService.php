@@ -161,9 +161,9 @@ class MailchimpSubscribeService extends Component
         }
 
         // Add tags to member if they were submitted.
-        if (!empty($opts['tags'])) {
+        if ($opts['tags'] !== null) {
             try {
-                $tags = $this->prepMemberTags($opts['tags']);
+                $tags = $this->prepMemberTags($opts['tags'], $result['tags']);
                 $tagsResult = $mc->request('lists/' . $audienceId . '/members/' . md5(strtolower($email)) . '/tags', ['tags' => $tags], 'POST');
             } catch (\Exception $e) {
                 Craft::error('An error occured when trying to add tags to email `' . $email . '`: ' . print_r($e->getMessage(), true), __METHOD__);
@@ -764,17 +764,29 @@ class MailchimpSubscribeService extends Component
     }
 
     /**
-     * Preps submitted array of tags for sending to member tags endpoint. All tags are assumed to be active, ie created if they doesn't exists.
+     * Preps submitted array of tags for sending to member tags endpoint. 
      *
      * @param array $tags
+     * @param array $memberTags
      * @return array
      */
-    private function prepMemberTags($tags): array
+    private function prepMemberTags($tags, $memberTags): array
     {
         $r = [];
-
-        foreach ($tags as $tag) {
-            $r[] = ['name' => $tag, 'status' => 'active'];
+        $tagsMap = [];
+        
+        foreach ($memberTags as $tag) {
+            $tagsMap[$tag->name] = 'inactive';
+        }
+        
+        if (is_array($tags)) {
+            foreach ($tags as $tag) {
+                $tagsMap[$tag] = 'active';
+            }
+        }
+        
+        foreach ($tagsMap as $tag=>$status) {
+            $r[] = ['name' => $tag, 'status' => $status];
         }
 
         return $r;
