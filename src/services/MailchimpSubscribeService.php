@@ -68,19 +68,6 @@ class MailchimpSubscribeService extends Component
         $member = $this->getMemberByEmail($email, $audienceId);
 
         // convert interest groups if present
-        /*
-        $interests = [];
-        if (isset($opts['interests']) && is_array($opts['interests']) && count($opts['interests'])) {
-            foreach ($opts['interests'] as $interest) {
-                $interests[$interest] = true;
-            }
-        }
-
-        if ($member && !empty($interests) && isset($member['interests'])) {
-            $interests = $this->prepInterests($audienceId, $member, $interests);
-        }
-        */
-
         $interests = [];
         if (isset($opts['interests']) && $opts['interests'] !== null) {
             $interests = $this->prepInterests($audienceId, $opts['interests']);
@@ -88,16 +75,11 @@ class MailchimpSubscribeService extends Component
         
         // marketing permissions
         $marketingPermissions = [];
-        if (isset($opts['marketing_permissions']) && is_array($opts['marketing_permissions']) && count($opts['marketing_permissions'])) {
-            foreach ($opts['marketing_permissions'] as $marketingPermission) {
-                $marketingPermissions[$marketingPermission] = true;
-            }
+        
+        if (isset($opts['marketing_permissions']) && $opts['marketing_permissions'] !== null) {
+            $marketingPermissions = $this->prepMarketingPermissions($member, $opts['marketing_permissions']);
         }
-
-        if ($member && !empty($marketingPermissions) && isset($member['marketing_permissions'])) {
-            $marketingPermissions = $this->prepMarketingPermissions($member, $marketingPermissions);
-        }
-
+        
         // Build the post variables
         $postVars = [
             'status_if_new' => $settings->doubleOptIn ? 'pending' : 'subscribed',
@@ -780,21 +762,26 @@ class MailchimpSubscribeService extends Component
     /**
      * Preps marketing permissions array by adding all missing permissions to array and assuming that they are disabled.
      *
-     * @param array $member
+     * @param Collection|null $member
      * @param array $marketingPermissions
      * @return array
      */
     private function prepMarketingPermissions($member, $marketingPermissions): array
     {
-        $memberMarketingPermissions = $member['marketing_permissions'];
+        $memberMarketingPermissions = $member ? $member['marketing_permissions'] : [];
+        $r = [];
 
         foreach ($memberMarketingPermissions as $memberMarketingPermission) {
-            if (!isset($marketingPermissions[$memberMarketingPermission->marketing_permission_id])) {
-                $marketingPermissions[$memberMarketingPermission->marketing_permission_id] = false;
+            $r[$memberMarketingPermission->marketing_permission_id] = false;
+        }
+        
+        if (is_array($marketingPermissions)) {
+            foreach ($marketingPermissions as $marketingPermission) {
+                $r[$marketingPermission] = true;
             }
         }
-
-        return $marketingPermissions;
+        
+        return $r;
     }
 
     /**
