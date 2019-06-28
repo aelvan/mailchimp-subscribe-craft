@@ -64,7 +64,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // create a new api instance, and subscribe
-        $mc = new Mailchimp($settings->apiKey);
+        $mc = $this->getClient();
         $member = $this->getMemberByEmail($email, $audienceId);
 
         // convert interest groups if present
@@ -206,7 +206,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // create a new api instance, and subscribe
-        $mc = new Mailchimp($settings->apiKey);
+        $mc = $this->getClient();;
 
         try {
             $result = $mc->request('lists/' . $audienceId . '/members/' . md5(strtolower($email)), ['status' => 'unsubscribed'], 'PATCH');
@@ -290,7 +290,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // create a new api instance, and subscribe
-        $mc = new Mailchimp($settings->apiKey);
+        $mc = $this->getClient();;
 
         try {
             if ($permanent) {
@@ -367,7 +367,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // create a new api instance
-        $mc = new Mailchimp($settings->apiKey);
+        $mc = $this->getClient();;
 
         try {
             /** @var Collection $member */
@@ -404,7 +404,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // create a new api instance
-        $mc = new Mailchimp($settings->apiKey);
+        $mc = $this->getClient();;
 
         try {
             /** @var Collection $list */
@@ -474,7 +474,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // create a new api instance
-        $mc = new Mailchimp($settings->apiKey);
+        $mc = $this->getClient();;
 
         try {
             /** @var Collection $result */
@@ -544,7 +544,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // create a new api instance
-        $mc = new Mailchimp($settings->apiKey);
+        $mc = $this->getClient();
 
         try {
             /** @var Collection $result */
@@ -690,6 +690,17 @@ class MailchimpSubscribeService extends Component
      */
 
     /**
+     * Creates Mailchimp client
+     * 
+     * @return Mailchimp
+     */
+    private function getClient(): Mailchimp
+    {
+        $settings = Plugin::$plugin->getSettings();
+        return new Mailchimp(Craft::parseEnv($settings->apiKey));
+    }
+
+    /**
      * Gets the correct list ID to use. Throws deprecation errors if something is wrong.
      *
      * @param $audienceId
@@ -719,7 +730,7 @@ class MailchimpSubscribeService extends Component
             $audienceId = $audienceIdArr[0];
         }
 
-        return $audienceId;
+        return Craft::parseEnv($audienceId);
     }
 
     /**
