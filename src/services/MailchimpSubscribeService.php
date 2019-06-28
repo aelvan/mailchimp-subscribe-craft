@@ -523,7 +523,7 @@ class MailchimpSubscribeService extends Component
      * 
      * @param string $email
      * @param string $audienceId
-     * @return Collection|null
+     * @return array|null
      * @throws DeprecationException
      */
     public function getMemberTagsByEmail($email, $audienceId = '')
@@ -562,7 +562,7 @@ class MailchimpSubscribeService extends Component
             return null;
         }
 
-        return $result;
+        return $result['tags'];
     }
     
 
