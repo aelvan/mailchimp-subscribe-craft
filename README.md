@@ -11,7 +11,7 @@ This plugin requires Craft CMS 3.0.0 or later.
 
 ### Updating from version 2.x to 3.x
 
-Too much, [see the changelog for information](https://raw.githubusercontent.com/aelvan/mailchimp-subscribe-craft/craft3/CHANGELOG.json).
+Too much, [see the changelog for information](https://raw.githubusercontent.com/aelvan/mailchimp-subscribe-craft/craft3/CHANGELOG.md).
 
 ### Updating from version 1.x (Craft 2) to 2.x (Craft 3)
 
@@ -695,4 +695,4 @@ The plugin is released under the MIT license, meaning you can do what ever you w
 
 Changelog
 ---
-See [CHANGELOG.json](https://raw.githubusercontent.com/aelvan/mailchimp-subscribe-craft/craft3/CHANGELOG.json).
+See [CHANGELOG.md](https://raw.githubusercontent.com/aelvan/mailchimp-subscribe-craft/craft3/CHANGELOG.md).
