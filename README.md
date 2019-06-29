@@ -383,7 +383,7 @@ if you return to the same template after success, without redirecting (see examp
 
 Subscribes a member to an audience. The following variables can be submitted:
 
-**email** (required): Email of member to subscribe.
+**email** (required): Email of member to subscribe.  
 **redirect**: Route to redirect to on success. If not set, the same route will be loaded with `mailchimpSubscribe` variable set.  
 **audienceId**: ID of audience to subscribe the member to. If not set, the configured `audienceId` will be used.  
 **email_type**: Email type the member prefers. Can be `html` (default) or `text`  
