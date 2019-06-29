@@ -1,6 +1,10 @@
 # Mailchimp Subscribe Changelog
 
-## 2.0.4 - 2018-02-02
+## 2.0.5 - 2019-06-29
+### Fixed
+- Fixed a bug that would create an error in PHP 7.2 due to an incorrect empty value. Backported from 3.0.0.
+
+## 2.0.4 - 2019-02-02
 ### Fixed
 - Fixed bugs in unsubscribe controller action.
 

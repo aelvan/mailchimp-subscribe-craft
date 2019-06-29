@@ -145,7 +145,7 @@ class MailchimpSubscribeService extends Component
 
         foreach ($listIdArr as $listId) {
             try {
-                $result = $mc->request('lists/'.$listId.'/members/'.md5(strtolower($email)), null, 'DELETE');
+                $result = $mc->request('lists/'.$listId.'/members/'.md5(strtolower($email)), [], 'DELETE');
                 $results[] = $this->getMessage(200, $email, null, Craft::t('mailchimp-subscribe', 'Unsubscribed successfully'), true);
             } catch (\Exception $e) { // an error occured
                 $msg = json_decode($e->getMessage());
