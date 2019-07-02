@@ -566,7 +566,7 @@ You can also get this directly from the member, this method is just for convenie
 You can access Mailchimp Subscribe's service methods from your own plugin or module, by doing something like this:
 
 ``` 
-$msPlugin = Craft::$app->plugins->getPlugin('mailchimpSubscribe');
+$msPlugin = Craft::$app->plugins->getPlugin('mailchimp-subscribe');
 
 if ($msPlugin && $msPlugin instanceof \aelvan\mailchimpsubscribe\MailchimpSubscribe) {
     $msPlugin->mailchimpSubscribe->subscribe('my_email@domain.com', '2a34d0978q');
