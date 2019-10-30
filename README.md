@@ -59,6 +59,24 @@ confirm their subscription before being added to the audience.
 
 ---
 
+The plugin config also supports using different settings on a per-site basis. This works like Craft's general config does:
+
+    <?php
+    return [
+        'apiKey' => [
+            'siteHandleA' => 'xxxxxxxxxxxxxxxxxxx-us2',
+            'siteHandleB' => 'xxxxxxxxxxxxxxxxxxx-us2',
+        ],
+        'audienceId' => [
+            'siteHandleA' => '7fw6eq98ca',
+            'siteHandleB' => '3fa8ew9fce',
+        ],
+        'doubleOptIn' => [
+            'siteHandleA' => true,
+            'siteHandleB' => false,
+        ],
+    ];
+
 ## Usage
 
 Mailchimp Subscribe let's you subscribe, unsubscribe and delete members to/from Mailchimp audiences.   
