@@ -398,7 +398,7 @@ class MailchimpSubscribeService extends Component
         $audienceId = $this->prepAudienceId($audienceId);
 
         // check if we got an api key and  id
-        if ($settings->getApiKeu() === '' || $audienceId === '') {
+        if ($settings->getApiKey() === '' || $audienceId === '') {
             Craft::error('API Key or Audience ID not supplied. Check your settings.', __METHOD__);
             return null;
         }
