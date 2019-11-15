@@ -1,5 +1,11 @@
 # Mailchimp Subscribe Changelog
 
+## 3.0.1 - 2019-06-28
+
+### Added
+- Added support for multisite config values using `ConfigHelper::localizedValue` (Thanks, @janhenckens). 
+
+
 ## 3.0.0 - 2019-06-28
 
 > {warning} This is a more complex update than usual, things have been changed and deprecated. Make sure you read this changelog before updating. 
