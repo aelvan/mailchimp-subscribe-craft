@@ -9,6 +9,7 @@
 namespace aelvan\mailchimpsubscribe\models;
 
 use craft\base\Model;
+use craft\helpers\ConfigHelper;
 
 class Settings extends Model
 {
@@ -16,4 +17,16 @@ class Settings extends Model
     public $listId = '';
     public $audienceId = '';
     public $doubleOptIn = true;
+
+    public function getApiKey($siteHandle = null) {
+        return ConfigHelper::localizedValue($this->apiKey, $siteHandle);
+    }
+
+    public function getAudienceId($siteHandle = null) {
+        return ConfigHelper::localizedValue($this->audienceId, $siteHandle);
+    }
+
+    public function getDoubleOptIn($siteHandle = null) {
+        return ConfigHelper::localizedValue($this->doubleOptIn, $siteHandle);
+    }
 }

@@ -54,7 +54,7 @@ class MailchimpSubscribeService extends Component
         // get list id string
         $audienceId = $this->prepAudienceId($audienceId);
 
-        if ($settings->apiKey === '' || $audienceId === '') { // error, no API key or list id
+        if ($settings->getApiKey() === '' || $audienceId === '') { // error, no API key or list id
             return new SubscribeResponse([
                 'success' => false,
                 'errorCode' => '2000',
@@ -82,8 +82,8 @@ class MailchimpSubscribeService extends Component
         
         // Build the post variables
         $postVars = [
-            'status_if_new' => $settings->doubleOptIn ? 'pending' : 'subscribed',
-            'status' => $settings->doubleOptIn ? 'pending' : 'subscribed',
+            'status_if_new' => $settings->getDoubleOptIn() ? 'pending' : 'subscribed',
+            'status' => $settings->getDoubleOptIn() ? 'pending' : 'subscribed',
             'email_type' => $opts['email_type'],
             'email_address' => $email,
         ];
@@ -195,7 +195,7 @@ class MailchimpSubscribeService extends Component
         // get list id string
         $audienceId = $this->prepAudienceId($audienceId);
 
-        if ($settings->apiKey === '' || $audienceId === '') { // error, no API key or list id
+        if ($settings->getApiKey() === '' || $audienceId === '') { // error, no API key or list id
             return new SubscribeResponse([
                 'action' => 'unsubscribe',
                 'success' => false,
@@ -279,7 +279,7 @@ class MailchimpSubscribeService extends Component
         // get list id string
         $audienceId = $this->prepAudienceId($audienceId);
 
-        if ($settings->apiKey === '' || $audienceId === '') { // error, no API key or list id
+        if ($settings->getApiKey() === '' || $audienceId === '') { // error, no API key or list id
             return new SubscribeResponse([
                 'action' => 'delete',
                 'success' => false,
@@ -361,7 +361,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // check if we got an api key and a audience id
-        if ($settings->apiKey === '' || $audienceId === '') {
+        if ($settings->getApiKey() === '' || $audienceId === '') {
             Craft::error('API Key or Audience ID not supplied. Check your settings.', __METHOD__);
             return null;
         }
@@ -398,7 +398,7 @@ class MailchimpSubscribeService extends Component
         $audienceId = $this->prepAudienceId($audienceId);
 
         // check if we got an api key and  id
-        if ($settings->apiKey === '' || $audienceId === '') {
+        if ($settings->getApiKey() === '' || $audienceId === '') {
             Craft::error('API Key or Audience ID not supplied. Check your settings.', __METHOD__);
             return null;
         }
@@ -440,7 +440,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // check if we got an api key and id
-        if ($settings->apiKey === '' || $audienceId === '') {
+        if ($settings->getApiKey() === '' || $audienceId === '') {
             Craft::error('API Key or Audience ID not supplied. Check your settings.', __METHOD__);
             return null;
         }
@@ -468,7 +468,7 @@ class MailchimpSubscribeService extends Component
         $audienceId = $this->prepAudienceId($audienceId);
 
         // check if we got an api key and a list id
-        if ($settings->apiKey === '' || $audienceId === '') { // error, no API key or list id
+        if ($settings->getApiKey() === '' || $audienceId === '') { // error, no API key or list id
             Craft::error('API Key or Audience ID not supplied. Check your settings.', __METHOD__);
             return null;
         }
@@ -538,7 +538,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // check if we got an api key and a list id
-        if ($settings->apiKey === '' || $audienceId === '') { // error, no API key or list id
+        if ($settings->getApiKey() === '' || $audienceId === '') { // error, no API key or list id
             Craft::error('API Key or Audience ID not supplied. Check your settings.', __METHOD__);
             return null;
         }
@@ -606,7 +606,7 @@ class MailchimpSubscribeService extends Component
         $audienceId = $this->prepAudienceId($audienceId);
 
         // check if we got an api key and a list id
-        if ($settings->apiKey === '' || $audienceId === '') { // error, no API key or list id
+        if ($settings->getApiKey() === '' || $audienceId === '') { // error, no API key or list id
             return $this->getMessage(2000, $email, [], Craft::t('mailchimp-subscribe', 'API Key or Audience ID not supplied. Check your settings.'));
         }
 
@@ -647,7 +647,7 @@ class MailchimpSubscribeService extends Component
         $listId = $this->prepAudienceId($listId);
 
         // check if we got an api key and a list id
-        if ($settings->apiKey === '' || $listId === '') { // error, no API key or list id
+        if ($settings->getApiKey() === '' || $listId === '') { // error, no API key or list id
             return $this->getMessage(2000, $email, [], Craft::t('mailchimp-subscribe', 'API Key or Audience ID not supplied. Check your settings.'));
         }
 
@@ -697,7 +697,7 @@ class MailchimpSubscribeService extends Component
     private function getClient(): Mailchimp
     {
         $settings = Plugin::$plugin->getSettings();
-        return new Mailchimp(Craft::parseEnv($settings->apiKey));
+        return new Mailchimp(Craft::parseEnv($settings->getApiKey()));
     }
 
     /**
@@ -715,12 +715,12 @@ class MailchimpSubscribeService extends Component
         if ($settings->listId !== '') {
             Craft::$app->deprecator->log(__METHOD__ . '_listId_setting', 'The Mailchimp Subscribe config setting `listId` has been deprecated and will be removed in the next major version. Use `audienceId` instead.');
 
-            if ($settings->audienceId === '') {
+            if ($settings->getAudienceId() === '') {
                 $settings->audienceId = $settings->listId;
             }
         }
 
-        $audienceId = !empty($audienceId) ? $audienceId : $settings->audienceId;
+        $audienceId = !empty($audienceId) ? $audienceId : $settings->getAudienceId();
 
         // split id string on | in case more than one list id is supplied
         $audienceIdArr = explode('|', $audienceId);
