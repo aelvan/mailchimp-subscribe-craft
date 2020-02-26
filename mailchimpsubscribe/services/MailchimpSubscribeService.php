@@ -72,7 +72,7 @@ class MailchimpSubscribeService extends BaseApplicationComponent
                         $postVars['status'] = 'subscribed';
                     }
 
-                    if (count($vars) > 0) {
+                    if (!empty($vars)) {
                         $postVars['merge_fields'] = $vars;
                     }
 
