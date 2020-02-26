@@ -84,15 +84,15 @@ class MailchimpSubscribeService extends Component
         $postVars = [
             'status_if_new' => $settings->getDoubleOptIn() ? 'pending' : 'subscribed',
             'status' => $settings->getDoubleOptIn() ? 'pending' : 'subscribed',
-            'email_type' => $opts['email_type'],
+            'email_type' => $opts['email_type'] ?? 'html',
             'email_address' => $email,
         ];
 
-        if ($opts['language'] !== null) {
+        if (isset($opts['language']) && $opts['language'] !== null) {
             $postVars['language'] = $opts['language'];
         }
 
-        if ($opts['vip'] !== null) {
+        if (isset($opts['vip']) && $opts['vip'] !== null) {
             $postVars['vip'] = $opts['vip'];
         }
 
@@ -721,7 +721,7 @@ class MailchimpSubscribeService extends Component
         }
 
         $audienceId = !empty($audienceId) ? $audienceId : $settings->getAudienceId();
-
+        
         // split id string on | in case more than one list id is supplied
         $audienceIdArr = explode('|', $audienceId);
 
