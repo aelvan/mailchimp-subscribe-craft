@@ -1,5 +1,11 @@
 # Mailchimp Subscribe Changelog
 
+## 3.0.2 - 2019-05-29
+
+### Added
+- Added some default values to `subscribe` service method to make it easier to work with the service directly. 
+
+
 ## 3.0.1 - 2019-06-28
 
 ### Added
