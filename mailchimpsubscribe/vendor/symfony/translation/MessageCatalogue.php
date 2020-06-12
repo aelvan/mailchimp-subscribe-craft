@@ -15,6 +15,8 @@ use Symfony\Component\Config\Resource\ResourceInterface;
 use Symfony\Component\Translation\Exception\LogicException;
 
 /**
+ * MessageCatalogue.
+ *
  * @author Fabien Potencier <fabien@symfony.com>
  */
 class MessageCatalogue implements MessageCatalogueInterface, MetadataAwareInterface
@@ -27,10 +29,12 @@ class MessageCatalogue implements MessageCatalogueInterface, MetadataAwareInterf
     private $parent;
 
     /**
+     * Constructor.
+     *
      * @param string $locale   The locale
      * @param array  $messages An array of messages classified by domain
      */
-    public function __construct(?string $locale, array $messages = array())
+    public function __construct($locale, array $messages = array())
     {
         $this->locale = $locale;
         $this->messages = $messages;

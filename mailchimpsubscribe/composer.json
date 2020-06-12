@@ -3,5 +3,12 @@
         "pacely/mailchimp-apiv3": "dev-master",
         "guzzlehttp/guzzle": "^6.3.0",
         "guzzlehttp/psr7": "^1.4"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "platform": {
+            "php": "7.0"
+        },
+        "preferred-install": "dist"
     }
 }

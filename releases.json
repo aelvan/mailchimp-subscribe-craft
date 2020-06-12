@@ -1,8 +1,16 @@
 [
   {
+    "version": "1.1.8",
+    "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
+    "date": "2020-06-12T21:44:00+02:00",
+    "notes": [
+      "[Fixed] Fixed incorrect composer autoload files and updated packages."
+    ]
+  },
+  {
     "version": "1.1.7",
     "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
-    "date": "2020-02-07:14:00+02:00",
+    "date": "2020-02-07T10:14:00+02:00",
     "notes": [
       "[Fixed] Fixed an error that would occur on PHP 7.2.",
       "[Added] Makes it possible to request more than 10 list interests."

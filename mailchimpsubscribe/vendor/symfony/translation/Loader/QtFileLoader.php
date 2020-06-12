@@ -11,11 +11,11 @@
 
 namespace Symfony\Component\Translation\Loader;
 
-use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Config\Util\XmlUtils;
+use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\Exception\InvalidResourceException;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
-use Symfony\Component\Translation\MessageCatalogue;
+use Symfony\Component\Config\Resource\FileResource;
 
 /**
  * QtFileLoader loads translations from QT Translations XML files.
@@ -50,7 +50,7 @@ class QtFileLoader implements LoaderInterface
         $nodes = $xpath->evaluate('//TS/context/name[text()="'.$domain.'"]');
 
         $catalogue = new MessageCatalogue($locale);
-        if (1 == $nodes->length) {
+        if ($nodes->length == 1) {
             $translations = $nodes->item(0)->nextSibling->parentNode->parentNode->getElementsByTagName('message');
             foreach ($translations as $translation) {
                 $translationValue = (string) $translation->getElementsByTagName('translation')->item(0)->nodeValue;

@@ -12,7 +12,6 @@
 namespace Symfony\Component\Translation\Command;
 
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -27,14 +26,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class XliffLintCommand extends Command
 {
-    protected static $defaultName = 'lint:xliff';
-
     private $format;
     private $displayCorrectFiles;
     private $directoryIteratorProvider;
     private $isReadableProvider;
 
-    public function __construct(string $name = null, callable $directoryIteratorProvider = null, callable $isReadableProvider = null)
+    public function __construct($name = null, $directoryIteratorProvider = null, $isReadableProvider = null)
     {
         parent::__construct($name);
 
@@ -48,6 +45,7 @@ class XliffLintCommand extends Command
     protected function configure()
     {
         $this
+            ->setName('lint:xliff')
             ->setDescription('Lints a XLIFF file and outputs encountered errors')
             ->addArgument('filename', null, 'A file or a directory or STDIN')
             ->addOption('format', null, InputOption::VALUE_REQUIRED, 'The output format', 'txt')
@@ -82,14 +80,14 @@ EOF
 
         if (!$filename) {
             if (!$stdin = $this->getStdin()) {
-                throw new RuntimeException('Please provide a filename or pipe file content to STDIN.');
+                throw new \RuntimeException('Please provide a filename or pipe file content to STDIN.');
             }
 
             return $this->display($io, array($this->validate($stdin)));
         }
 
         if (!$this->isReadable($filename)) {
-            throw new RuntimeException(sprintf('File or directory "%s" is not readable.', $filename));
+            throw new \RuntimeException(sprintf('File or directory "%s" is not readable.', $filename));
         }
 
         $filesInfo = array();
@@ -102,8 +100,6 @@ EOF
 
     private function validate($content, $file = null)
     {
-        $errors = array();
-
         // Avoid: Warning DOMDocument::loadXML(): Empty string supplied as input
         if ('' === trim($content)) {
             return array('file' => $file, 'valid' => true);
@@ -113,33 +109,22 @@ EOF
 
         $document = new \DOMDocument();
         $document->loadXML($content);
-
-        if (null !== $targetLanguage = $this->getTargetLanguageFromFile($document)) {
-            $expectedFileExtension = sprintf('%s.xlf', str_replace('-', '_', $targetLanguage));
-            $realFileExtension = explode('.', basename($file), 2)[1] ?? '';
-
-            if ($expectedFileExtension !== $realFileExtension) {
-                $errors[] = array(
-                    'line' => -1,
-                    'column' => -1,
-                    'message' => sprintf('There is a mismatch between the file extension ("%s") and the "%s" value used in the "target-language" attribute of the file.', $realFileExtension, $targetLanguage),
-                );
-            }
+        if ($document->schemaValidate(__DIR__.'/../Resources/schemas/xliff-core-1.2-strict.xsd')) {
+            return array('file' => $file, 'valid' => true);
         }
 
-        $document->schemaValidate(__DIR__.'/../Resources/schemas/xliff-core-1.2-strict.xsd');
-        foreach (libxml_get_errors() as $xmlError) {
-            $errors[] = array(
-                'line' => $xmlError->line,
-                'column' => $xmlError->column,
-                'message' => trim($xmlError->message),
+        $errorMessages = array_map(function ($error) {
+            return array(
+                'line' => $error->line,
+                'column' => $error->column,
+                'message' => trim($error->message),
             );
-        }
+        }, libxml_get_errors());
 
         libxml_clear_errors();
         libxml_use_internal_errors(false);
 
-        return array('file' => $file, 'valid' => 0 === \count($errors), 'messages' => $errors);
+        return array('file' => $file, 'valid' => false, 'messages' => $errorMessages);
     }
 
     private function display(SymfonyStyle $io, array $files)
@@ -150,13 +135,13 @@ EOF
             case 'json':
                 return $this->displayJson($io, $files);
             default:
-                throw new InvalidArgumentException(sprintf('The format "%s" is not supported.', $this->format));
+                throw new \InvalidArgumentException(sprintf('The format "%s" is not supported.', $this->format));
         }
     }
 
     private function displayTxt(SymfonyStyle $io, array $filesInfo)
     {
-        $countFiles = \count($filesInfo);
+        $countFiles = count($filesInfo);
         $erroredFiles = 0;
 
         foreach ($filesInfo as $info) {
@@ -206,7 +191,7 @@ EOF
         }
 
         foreach ($this->getDirectoryIterator($fileOrDirectory) as $file) {
-            if (!\in_array($file->getExtension(), array('xlf', 'xliff'))) {
+            if (!in_array($file->getExtension(), array('xlf', 'xliff'))) {
                 continue;
             }
 
@@ -238,7 +223,7 @@ EOF
         };
 
         if (null !== $this->directoryIteratorProvider) {
-            return \call_user_func($this->directoryIteratorProvider, $directory, $default);
+            return call_user_func($this->directoryIteratorProvider, $directory, $default);
         }
 
         return $default($directory);
@@ -251,20 +236,9 @@ EOF
         };
 
         if (null !== $this->isReadableProvider) {
-            return \call_user_func($this->isReadableProvider, $fileOrDirectory, $default);
+            return call_user_func($this->isReadableProvider, $fileOrDirectory, $default);
         }
 
         return $default($fileOrDirectory);
-    }
-
-    private function getTargetLanguageFromFile(\DOMDocument $xliffContents): ?string
-    {
-        foreach ($xliffContents->getElementsByTagName('file')[0]->attributes ?? array() as $attribute) {
-            if ('target-language' === $attribute->nodeName) {
-                return $attribute->nodeValue;
-            }
-        }
-
-        return null;
     }
 }

@@ -5,20 +5,6 @@ namespace Illuminate\Contracts\Queue;
 interface Job
 {
     /**
-     * Get the job identifier.
-     *
-     * @return string
-     */
-    public function getJobId();
-
-    /**
-     * Get the decoded body of the job.
-     *
-     * @return array
-     */
-    public function payload();
-
-    /**
      * Fire the job.
      *
      * @return void
