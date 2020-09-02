@@ -1,6 +1,12 @@
 # Mailchimp Subscribe Changelog
 
-## 3.0.2 - 2019-05-29
+## 3.0.3 - 2020-09-02
+
+### Fixed
+- Fixed error when subscibing without adding tags (Thanks, @simonkuran).
+
+
+## 3.0.2 - 2019-06-29
 
 ### Added
 - Added some default values to `subscribe` service method to make it easier to work with the service directly. 
