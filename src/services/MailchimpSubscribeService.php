@@ -150,7 +150,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // Add tags to member if they were submitted.
-        if ($opts['tags'] !== null) {
+        if (isset($opts['tags']) && $opts['tags'] !== null) {
             try {
                 $tags = $this->prepMemberTags($opts['tags'], $result['tags']);
                 $tagsResult = $mc->request('lists/' . $audienceId . '/members/' . md5(strtolower($email)) . '/tags', ['tags' => $tags], 'POST');
