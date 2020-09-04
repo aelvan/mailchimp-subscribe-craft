@@ -388,6 +388,74 @@ Again, make sure your form actually is GDPR compliant, and don't blame me.
 
 ---
 
+## Events
+
+There are several events that enable the ability for you to trigger custom code.
+Right now we have events for the subscribe, unsubscribe and delete actions that occur.
+All events should be listened to using the MailchimpSubscribeService class, examples can be found below
+
+### onAfterSubscribe
+
+The onAfterSubscribe event is triggered whenever a successful subscribe action has occurred. The SubscribeEvent class will
+contain the following properties:
+- (string) email
+- (string) audienceId
+
+```php
+use aelvan\mailchimpsubscribe\events\SubscribeEvent;
+use aelvan\mailchimpsubscribe\services\MailchimpSubscribeService;
+
+Event::on(
+    MailchimpSubscribeService::class,
+    MailchimpSubscribeService::EVENT_AFTER_SUBSCRIBE,
+    function (SubscribeEvent $event) {
+        // custom logic
+    }
+);
+```
+
+### onAfterUnsubscribe
+
+The onAfterSubscribe event is triggered whenever a successful unsubscribe action has occurred. The UnsubscribeEvent class will
+contain the following properties:
+- (string) email
+- (string) audienceId
+
+```php
+use aelvan\mailchimpsubscribe\events\UnsubscribeEvent;
+use aelvan\mailchimpsubscribe\services\MailchimpSubscribeService;
+
+Event::on(
+    MailchimpSubscribeService::class,
+    MailchimpSubscribeService::EVENT_AFTER_UNSUBSCRIBE,
+    function (UnsubscribeEvent $event) {
+        // custom logic
+    }
+);
+```
+### onAfterDelete
+
+The onAfterDelete event is triggered whenever a successful delete action has occurred. The DeleteEvent class will
+contain the following properties:
+- (string) email
+- (string) audienceId
+- (bool) permanent
+
+```php
+use aelvan\mailchimpsubscribe\events\DeleteEvent;
+use aelvan\mailchimpsubscribe\services\MailchimpSubscribeService;
+
+Event::on(
+    MailchimpSubscribeService::class,
+    MailchimpSubscribeService::EVENT_AFTER_DELETE,
+    function (DeleteEvent $event) {
+        // custom logic
+    }
+);
+```
+
+---
+
 ## Controller actions
 
 All controller actions: 
