@@ -8,6 +8,9 @@
 
 namespace aelvan\mailchimpsubscribe\services;
 
+use aelvan\mailchimpsubscribe\events\DeleteEvent;
+use aelvan\mailchimpsubscribe\events\SubscribeEvent;
+use aelvan\mailchimpsubscribe\events\UnsubscribeEvent;
 use Craft;
 use craft\base\Component;
 use craft\errors\DeprecationException;
@@ -27,6 +30,10 @@ use Mailchimp\Mailchimp;
  */
 class MailchimpSubscribeService extends Component
 {
+    const EVENT_AFTER_SUBSCRIBE = 'onAfterSubscribe';
+    const EVENT_AFTER_UNSUBSCRIBE = 'onAfterUnsubscribe';
+    const EVENT_AFTER_DELETE = 'onAfterDelete';
+
     /**
      * Subscribe a member to a Mailchimp lists
      *
@@ -149,6 +156,14 @@ class MailchimpSubscribeService extends Component
             ]);
         }
 
+        // Fire an afterSubscribe event
+        $event = new SubscribeEvent([
+            'email' => $email,
+            'audienceId' => $audienceId
+        ]);
+
+        $this->trigger(self::EVENT_AFTER_SUBSCRIBE, $event);
+
         // Add tags to member if they were submitted.
         if (isset($opts['tags']) && $opts['tags'] !== null) {
             try {
@@ -242,6 +257,14 @@ class MailchimpSubscribeService extends Component
             ]);
         }
 
+        // Fire an afterUnsubscribe event
+        $event = new UnsubscribeEvent([
+            'email' => $email,
+            'audienceId' => $audienceId
+        ]);
+
+        $this->trigger(self::EVENT_AFTER_UNSUBSCRIBE, $event);
+
         return new SubscribeResponse([
             'action' => 'unsubscribe',
             'response' => $result,
@@ -329,6 +352,15 @@ class MailchimpSubscribeService extends Component
                 'values' => ['email' => $email]
             ]);
         }
+
+        // Fire an afterDelete event
+        $event = new DeleteEvent([
+            'email' => $email,
+            'audienceId' => $audienceId,
+            'permanent' => $permanent
+        ]);
+
+        $this->trigger(self::EVENT_AFTER_DELETE, $event);
 
         return new SubscribeResponse([
             'action' => 'delete',
