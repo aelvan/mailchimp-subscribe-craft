@@ -19,14 +19,14 @@ class Settings extends Model
     public $doubleOptIn = true;
 
     public function getApiKey($siteHandle = null) {
-        return ConfigHelper::localizedValue($this->apiKey, $siteHandle);
+        return \Craft::parseEnv(ConfigHelper::localizedValue($this->apiKey, $siteHandle));
     }
 
     public function getAudienceId($siteHandle = null) {
-        return ConfigHelper::localizedValue($this->audienceId, $siteHandle);
+        return \Craft::parseEnv(ConfigHelper::localizedValue($this->audienceId, $siteHandle));
     }
 
     public function getDoubleOptIn($siteHandle = null) {
-        return ConfigHelper::localizedValue($this->doubleOptIn, $siteHandle);
+        return \Craft::parseEnv(ConfigHelper::localizedValue($this->doubleOptIn, $siteHandle));
     }
 }
