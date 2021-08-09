@@ -604,7 +604,7 @@ $response = $msPlugin->mailchimpSubscribe->subscribe('myemail@domain.com', '2a34
     'email_type' => 'html', 
     'language' => 'no',
     'merge_fields' => [
-        'FNAME' => 'Lorem'
+        'FNAME' => 'Lorem',
         'LNAME' => 'Ipsum'
     ]
 ]);
