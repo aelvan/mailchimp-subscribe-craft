@@ -1,5 +1,14 @@
 # Mailchimp Subscribe Changelog
 
+## 3.1.0 - 2021-08-09
+
+### Changed
+- Removed dependency on `pacely/mailchimp-api-v3` and added client directly in plugin.
+
+### Added
+- Added support for Craft style env-variables in settings.
+- Added `onAfterSubscribe` and `onAfterUnsubscribe` events (Thanks, @wblommaert).
+
 ## 3.0.3 - 2020-09-02
 
 ### Fixed
