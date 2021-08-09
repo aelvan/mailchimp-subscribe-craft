@@ -5,7 +5,7 @@ Mailchimp Subscribe for [Craft](http://craftcms.com/) is a plugin for working wi
 
 ## Requirements
 
-This plugin requires Craft CMS 3.0.0 or later.
+This plugin requires Craft CMS 3.1.0 or later.
 
 ## Update notes
 
@@ -775,7 +775,7 @@ Returned by the `get-audience-by-id` controller actions. Has the following prope
 
 Price, license and support
 ---
-The plugin is released under the MIT license, meaning you can do what ever you want with it as long as you don't  blame me. **It's free**, which means there is absolutely no support included, but you might get it anyway. Just post an issue here on github if you have one, and I'll see what I can do. 
+The plugin is released under the MIT license, meaning you can do what ever you want with it as long as you don't  blame me. **It's free**, which means there is absolutely no support included. 
 
 ---
 
