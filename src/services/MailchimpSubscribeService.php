@@ -20,7 +20,7 @@ use aelvan\mailchimpsubscribe\models\SubscribeResponse;
 use aelvan\mailchimpsubscribe\models\Settings;
 
 use Illuminate\Support\Collection;
-use Mailchimp\Mailchimp;
+use aelvan\mailchimpsubscribe\MailchimpClient as Mailchimp;
 
 
 /**
