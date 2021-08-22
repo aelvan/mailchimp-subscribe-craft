@@ -1,5 +1,10 @@
 # Mailchimp Subscribe Changelog
 
+## 3.1.1 - 2021-08-22
+
+### Changed
+- Changed interest-categories max count to 100 (thanks, @SamLNL).
+
 ## 3.1.0 - 2021-08-09
 
 ### Changed
@@ -7,12 +12,12 @@
 
 ### Added
 - Added support for Craft style env-variables in settings.
-- Added `onAfterSubscribe` and `onAfterUnsubscribe` events (Thanks, @wblommaert).
+- Added `onAfterSubscribe` and `onAfterUnsubscribe` events (thanks, @wblommaert).
 
 ## 3.0.3 - 2020-09-02
 
 ### Fixed
-- Fixed error when subscibing without adding tags (Thanks, @simonkuran).
+- Fixed error when subscibing without adding tags (thanks, @simonkuran).
 
 
 ## 3.0.2 - 2020-05-29
@@ -24,7 +29,7 @@
 ## 3.0.1 - 2019-06-28
 
 ### Added
-- Added support for multisite config values using `ConfigHelper::localizedValue` (Thanks, @janhenckens). 
+- Added support for multisite config values using `ConfigHelper::localizedValue` (thanks, @janhenckens). 
 
 
 ## 3.0.0 - 2019-06-28
