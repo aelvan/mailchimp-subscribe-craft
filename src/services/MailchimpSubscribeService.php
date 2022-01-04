@@ -521,7 +521,7 @@ class MailchimpSubscribeService extends Component
                 $categoryData['interests'] = [];
 
                 /** @var Collection $interestsResult */
-                $interestsResult = $mc->request('lists/' . $audienceId . '/interest-categories/' . $category->id . '/interests&count=100');
+                $interestsResult = $mc->request('lists/' . $audienceId . '/interest-categories/' . $category->id . '/interests', ['count' => 100]);
 
                 foreach ($interestsResult['interests'] as $interest) {
                     $interestData = [];
