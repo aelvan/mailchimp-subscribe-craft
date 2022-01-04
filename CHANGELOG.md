@@ -1,5 +1,10 @@
 # Mailchimp Subscribe Changelog
 
+## 3.1.1.1 - 2022-01-04
+
+### Fixed
+- Fixed API error for `getInterestGroups()` method  
+
 ## 3.1.1 - 2021-08-22
 
 ### Changed
