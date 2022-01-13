@@ -73,11 +73,12 @@ class MailchimpSubscribeService extends Component
         // create a new api instance, and subscribe
         $mc = $this->getClient();
         $member = $this->getMemberByEmail($email, $audienceId);
+        $memberInterests = $member->all()['interests'];
 
         // convert interest groups if present
         $interests = [];
         if (isset($opts['interests']) && $opts['interests'] !== null) {
-            $interests = $this->prepInterests($audienceId, $opts['interests']);
+            $interests = $this->prepInterests($audienceId, $opts['interests'], $memberInterests);
         }
         
         // marketing permissions
@@ -764,17 +765,18 @@ class MailchimpSubscribeService extends Component
 
         return Craft::parseEnv($audienceId);
     }
-
+    
     /**
      * Preps interests. For groups that have been set in front-end form, existing interests are reset.
      *
      * @param string $audienceId
      * @param array|string $interests
      *
+     * @param $memberInterests
      * @return array
      * @throws DeprecationException
      */
-    private function prepInterests($audienceId, $interests): array
+    private function prepInterests($audienceId, $interests, $memberInterests): array
     {
         $interestGroupsResult = $this->getInterestGroups($audienceId);
         $r = [];
@@ -783,7 +785,13 @@ class MailchimpSubscribeService extends Component
         foreach ($interestGroupsResult as $group) {
             if (isset($interests[$group['title']])) {
                 foreach ($group['interests'] as $groupInterest) {
-                    $r[$groupInterest['id']] = false;
+                    $interestId = $groupInterest['id'];
+                    
+                    $r[$interestId] = false;
+                    
+                    if ($memberInterests->$interestId) {
+                        $r[$interestId] = true;
+                    }
                 }
             }
         }
