@@ -1,13 +1,27 @@
-Mailchimp Subscribe plugin for Craft CMS 3.x
+*This plugin has retired!*
+===
+
+*Nine years after its inception (in plugin-years, that's like 108 human years), it's time to retire this plugin. 
+I've created a Craft 4 version to ease the transition, but no new development will be done, and no support given. 
+It's time for you to start looking for/creating alternatives.*
+
+
+Mailchimp Subscribe plugin for Craft CMS 4.x
 ===
 
 Mailchimp Subscribe for [Craft](http://craftcms.com/) is a plugin for working with Mailchimp audiences.  
 
+
+
 ## Requirements
 
-This plugin requires Craft CMS 3.1.0 or later.
+This plugin requires Craft CMS 4.0.0 or later.
 
 ## Update notes
+
+### Updating from version 3.x to 4.x
+
+This is a minimum effort upgrade to Craft 4, no changes.
 
 ### Updating from version 2.x to 3.x
 

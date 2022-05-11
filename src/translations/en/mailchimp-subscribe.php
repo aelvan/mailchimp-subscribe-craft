@@ -1,9 +1,9 @@
 <?php
 /**
- * Mailchimp Subscribe plugin for Craft CMS 3.x
+ * Mailchimp Subscribe plugin for Craft CMS 4.x
  *
  * @link      https://www.vaersaagod.no
- * @copyright Copyright (c) 2017 André Elvan
+ * @copyright Copyright (c) 2022 André Elvan
  */
 
 /**

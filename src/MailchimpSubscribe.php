@@ -1,9 +1,9 @@
 <?php
 /**
- * Mailchimp Subscribe plugin for Craft CMS 3.x
+ * Mailchimp Subscribe plugin for Craft CMS 4.x
  *
  * @link      https://www.vaersaagod.no
- * @copyright Copyright (c) 2017 André Elvan
+ * @copyright Copyright (c) 2022 André Elvan
  */
 
 namespace aelvan\mailchimpsubscribe;
@@ -13,6 +13,7 @@ use aelvan\mailchimpsubscribe\services\MailchimpSubscribeService;
 use aelvan\mailchimpsubscribe\variables\MailchimpSubscribeVariable;
 
 use Craft;
+use craft\base\Model;
 use craft\base\Plugin;
 use craft\web\twig\variables\CraftVariable;
 
@@ -68,7 +69,7 @@ class MailchimpSubscribe extends Plugin
     /**
      * @inheritdoc
      */
-    protected function createSettingsModel()
+    protected function createSettingsModel(): ?Model
     {
         return new Settings();
     }
