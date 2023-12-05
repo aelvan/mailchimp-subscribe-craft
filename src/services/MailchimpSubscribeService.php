@@ -373,6 +373,101 @@ class MailchimpSubscribeService extends Component
     }
     
     /**
+     * Change a member's email address in a Mailchimp list
+     *
+     * @param string $currentEmail
+     * @param string $newEmail
+     * @param string $audienceId
+     * @return SubscribeResponse
+     * @throws DeprecationException
+     */
+    public function changeEmail($currentEmail, $newEmail, $audienceId): SubscribeResponse
+    {
+        // get settings
+        $settings = Plugin::$plugin->getSettings();
+
+        if ($currentEmail === '' || !$this->validateEmail($currentEmail)) { // error, invalid current email
+            return new SubscribeResponse([
+                'action' => 'change',
+                'success' => false,
+                'errorCode' => '1000',
+                'message' => Craft::t('mailchimp-subscribe', 'Invalid current email'),
+                'values' => ['current email' => $currentEmail]
+            ]);
+        }
+
+        if ($newEmail === '' || !$this->validateEmail($newEmail)) { // error, invalid new email
+            return new SubscribeResponse([
+                'action' => 'change',
+                'success' => false,
+                'errorCode' => '1000',
+                'message' => Craft::t('mailchimp-subscribe', 'Invalid new email'),
+                'values' => ['new email' => $newEmail]
+            ]);
+        }
+
+        // get list id string
+        $audienceId = $this->prepAudienceId($audienceId);
+
+        if ($settings->getApiKey() === '' || $audienceId === '') { // error, no API key or list id
+            return new SubscribeResponse([
+                'action' => 'change',
+                'success' => false,
+                'errorCode' => '2000',
+                'message' => Craft::t('mailchimp-subscribe', 'API Key or Audience ID not supplied. Check your settings.'),
+                'values' => ['current email' => $currentEmail, 'new email' => $newEmail]
+            ]);
+        }
+
+        // create a new api instance, and change email
+        $mc = $this->getClient();;
+
+        try {
+            $result = $mc->request('lists/' . $audienceId . '/members/' . md5(strtolower($currentEmail)), ['email_address' => $newEmail,
+                'status' => 'subscribed'], 'PATCH');
+
+            if (isset($result['_links'])) {
+                unset($result['_links']);
+            }
+        } catch (\Exception $e) { // an error occured
+            $message = $e->getMessage();
+            $errorObj = json_decode($message, false);
+
+            if (JSON_ERROR_NONE !== json_last_error()) {
+                Craft::error('An error occured when trying to change email `' . $currentEmail . '` to `' . $newEmail . '`: ' . $message, __METHOD__);
+
+                return new SubscribeResponse([
+                    'action' => 'change',
+                    'success' => false,
+                    'errorCode' => $errorObj->status ?? '9999',
+                    'message' => Craft::t('mailchimp-subscribe', $message),
+                    'values' => ['current email' => $currentEmail, 'new email' => $newEmail]
+                ]);
+            }
+
+            Craft::error('An error occured when trying to change email `' . $currentEmail . '` to `' . $newEmail . '`: ' . $errorObj->title . ' (' . $errorObj->status . ')', __METHOD__);
+
+            return new SubscribeResponse([
+                'action' => 'change',
+                'response' => $errorObj,
+                'success' => false,
+                'errorCode' => $errorObj->status,
+                'message' => Craft::t('mailchimp-subscribe', $errorObj->title),
+                'values' => ['current email' => $currentEmail, 'new email' => $newEmail]
+            ]);
+        }
+
+        return new SubscribeResponse([
+            'action' => 'change',
+            'response' => $result,
+            'success' => true,
+            'errorCode' => 200,
+            'message' => Craft::t('mailchimp-subscribe', 'Deleted successfully'),
+            'values' => ['current email' => $currentEmail, 'new email' => $newEmail]
+        ]);
+    }
+
+    /**
      * Return member object by email
      *
      * @param string $email
