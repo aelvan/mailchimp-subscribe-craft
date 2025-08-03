@@ -8,9 +8,6 @@
 
 namespace aelvan\mailchimpsubscribe\services;
 
-use aelvan\mailchimpsubscribe\events\DeleteEvent;
-use aelvan\mailchimpsubscribe\events\SubscribeEvent;
-use aelvan\mailchimpsubscribe\events\UnsubscribeEvent;
 use Craft;
 use craft\base\Component;
 use craft\errors\DeprecationException;
@@ -18,7 +15,11 @@ use craft\errors\DeprecationException;
 use aelvan\mailchimpsubscribe\MailchimpSubscribe as Plugin;
 use aelvan\mailchimpsubscribe\models\SubscribeResponse;
 use aelvan\mailchimpsubscribe\models\Settings;
+use aelvan\mailchimpsubscribe\events\DeleteEvent;
+use aelvan\mailchimpsubscribe\events\SubscribeEvent;
+use aelvan\mailchimpsubscribe\events\UnsubscribeEvent;
 
+use craft\helpers\App;
 use Illuminate\Support\Collection;
 use aelvan\mailchimpsubscribe\MailchimpClient as Mailchimp;
 
@@ -30,23 +31,24 @@ use aelvan\mailchimpsubscribe\MailchimpClient as Mailchimp;
  */
 class MailchimpSubscribeService extends Component
 {
-    const EVENT_AFTER_SUBSCRIBE = 'onAfterSubscribe';
-    const EVENT_AFTER_UNSUBSCRIBE = 'onAfterUnsubscribe';
-    const EVENT_AFTER_DELETE = 'onAfterDelete';
+    public const EVENT_AFTER_SUBSCRIBE = 'onAfterSubscribe';
+    public const EVENT_AFTER_UNSUBSCRIBE = 'onAfterUnsubscribe';
+    public const EVENT_AFTER_DELETE = 'onAfterDelete';
 
     /**
-     * Subscribe a member to a Mailchimp lists
+     * Subscribe a member to a Mailchimp audience
      *
-     * @param string $email
-     * @param string $audienceId
+     * @param string     $email
+     * @param string     $audienceId
      * @param array|null $opts
      *
      * @return SubscribeResponse
      * @throws DeprecationException
      */
-    public function subscribe($email, $audienceId, $opts = null): SubscribeResponse
+    public function subscribe(string $email, string $audienceId, array $opts = null): SubscribeResponse
     {
         // get settings
+        /** @var Settings $settings */
         $settings = Plugin::$plugin->getSettings();
 
         if ($email === '' || !$this->validateEmail($email)) { // error, invalid email
@@ -61,7 +63,7 @@ class MailchimpSubscribeService extends Component
         // get list id string
         $audienceId = $this->prepAudienceId($audienceId);
 
-        if ($settings->getApiKey() === '' || $audienceId === '') { // error, no API key or list id
+        if ($audienceId === '' || $settings->getApiKey() === '') { // error, no API key or list id
             return new SubscribeResponse([
                 'success' => false,
                 'errorCode' => '2000',
@@ -76,14 +78,14 @@ class MailchimpSubscribeService extends Component
 
         // convert interest groups if present
         $interests = [];
-        if (isset($opts['interests']) && $opts['interests'] !== null) {
+        if (isset($opts['interests'])) {
             $interests = $this->prepInterests($audienceId, $opts['interests']);
         }
         
         // marketing permissions
         $marketingPermissions = [];
         
-        if (isset($opts['marketing_permissions']) && $opts['marketing_permissions'] !== null) {
+        if (isset($opts['marketing_permissions'])) {
             $marketingPermissions = $this->prepMarketingPermissions($member, $opts['marketing_permissions']);
         }
         
@@ -95,11 +97,11 @@ class MailchimpSubscribeService extends Component
             'email_address' => $email,
         ];
 
-        if (isset($opts['language']) && $opts['language'] !== null) {
+        if (isset($opts['language'])) {
             $postVars['language'] = $opts['language'];
         }
 
-        if (isset($opts['vip']) && $opts['vip'] !== null) {
+        if (isset($opts['vip'])) {
             $postVars['vip'] = $opts['vip'];
         }
 
@@ -165,7 +167,7 @@ class MailchimpSubscribeService extends Component
         $this->trigger(self::EVENT_AFTER_SUBSCRIBE, $event);
 
         // Add tags to member if they were submitted.
-        if (isset($opts['tags']) && $opts['tags'] !== null) {
+        if (isset($opts['tags'])) {
             try {
                 $tags = $this->prepMemberTags($opts['tags'], $result['tags']);
                 $tagsResult = $mc->request('lists/' . $audienceId . '/members/' . md5(strtolower($email)) . '/tags', ['tags' => $tags], 'POST');
@@ -192,7 +194,7 @@ class MailchimpSubscribeService extends Component
      * @return SubscribeResponse
      * @throws DeprecationException
      */
-    public function unsubscribe($email, $audienceId): SubscribeResponse
+    public function unsubscribe(string $email, string $audienceId): SubscribeResponse
     {
         // get settings
         $settings = Plugin::$plugin->getSettings();
@@ -210,7 +212,7 @@ class MailchimpSubscribeService extends Component
         // get list id string
         $audienceId = $this->prepAudienceId($audienceId);
 
-        if ($settings->getApiKey() === '' || $audienceId === '') { // error, no API key or list id
+        if ($audienceId === '' || $settings->getApiKey() === '') { // error, no API key or list id
             return new SubscribeResponse([
                 'action' => 'unsubscribe',
                 'success' => false,
@@ -221,7 +223,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // create a new api instance, and subscribe
-        $mc = $this->getClient();;
+        $mc = $this->getClient();
 
         try {
             $result = $mc->request('lists/' . $audienceId . '/members/' . md5(strtolower($email)), ['status' => 'unsubscribed'], 'PATCH');
@@ -284,7 +286,7 @@ class MailchimpSubscribeService extends Component
      * @return SubscribeResponse
      * @throws DeprecationException
      */
-    public function delete($email, $audienceId, $permanent = false): SubscribeResponse
+    public function delete(string $email, string $audienceId, bool $permanent = false): SubscribeResponse
     {
         // get settings
         $settings = Plugin::$plugin->getSettings();
@@ -302,7 +304,7 @@ class MailchimpSubscribeService extends Component
         // get list id string
         $audienceId = $this->prepAudienceId($audienceId);
 
-        if ($settings->getApiKey() === '' || $audienceId === '') { // error, no API key or list id
+        if ($audienceId === '' || $settings->getApiKey() === '') { // error, no API key or list id
             return new SubscribeResponse([
                 'action' => 'delete',
                 'success' => false,
@@ -313,7 +315,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // create a new api instance, and subscribe
-        $mc = $this->getClient();;
+        $mc = $this->getClient();
 
         try {
             if ($permanent) {
@@ -381,7 +383,7 @@ class MailchimpSubscribeService extends Component
      * @return Collection|null
      * @throws DeprecationException
      */
-    public function getMemberByEmail($email, $audienceId)
+    public function getMemberByEmail(string $email, string $audienceId)
     {
         // get settings
         $settings = Plugin::$plugin->getSettings();
@@ -393,13 +395,13 @@ class MailchimpSubscribeService extends Component
         }
 
         // check if we got an api key and a audience id
-        if ($settings->getApiKey() === '' || $audienceId === '') {
+        if ($audienceId === '' || $settings->getApiKey() === '') {
             Craft::error('API Key or Audience ID not supplied. Check your settings.', __METHOD__);
             return null;
         }
 
         // create a new api instance
-        $mc = $this->getClient();;
+        $mc = $this->getClient();
 
         try {
             /** @var Collection $member */
@@ -423,20 +425,20 @@ class MailchimpSubscribeService extends Component
      * @return Collection|null
      * @throws DeprecationException
      */
-    public function getAudienceById($audienceId)
+    public function getAudienceById(string $audienceId): ?Collection
     {
         // get settings
         $settings = Plugin::$plugin->getSettings();
         $audienceId = $this->prepAudienceId($audienceId);
 
-        // check if we got an api key and  id
-        if ($settings->getApiKey() === '' || $audienceId === '') {
+        // check if we got an api key and id
+        if ($audienceId === '' || $settings->getApiKey() === '') {
             Craft::error('API Key or Audience ID not supplied. Check your settings.', __METHOD__);
             return null;
         }
 
         // create a new api instance
-        $mc = $this->getClient();;
+        $mc = $this->getClient();
 
         try {
             /** @var Collection $list */
@@ -455,12 +457,12 @@ class MailchimpSubscribeService extends Component
     /**
      * Gets marketing permissions from member by email
      *
-     * @param $email
-     * @param $audienceId
+     * @param string $email
+     * @param string $audienceId
      * @return array|null
      * @throws DeprecationException
      */
-    public function getMarketingPermissionsByEmail($email, $audienceId)
+    public function getMarketingPermissionsByEmail(string $email, string $audienceId): ?array
     {
         // get settings
         $settings = Plugin::$plugin->getSettings();
@@ -472,7 +474,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // check if we got an api key and id
-        if ($settings->getApiKey() === '' || $audienceId === '') {
+        if ($audienceId === '' || $settings->getApiKey() === '') {
             Craft::error('API Key or Audience ID not supplied. Check your settings.', __METHOD__);
             return null;
         }
@@ -494,19 +496,19 @@ class MailchimpSubscribeService extends Component
      * @return array|null
      * @throws DeprecationException
      */
-    public function getInterestGroups($audienceId = '')
+    public function getInterestGroups(string $audienceId = ''): ?array
     {
         $settings = Plugin::$plugin->getSettings();
         $audienceId = $this->prepAudienceId($audienceId);
 
         // check if we got an api key and a list id
-        if ($settings->getApiKey() === '' || $audienceId === '') { // error, no API key or list id
+        if ($audienceId === '' || $settings->getApiKey() === '') { // error, no API key or list id
             Craft::error('API Key or Audience ID not supplied. Check your settings.', __METHOD__);
             return null;
         }
 
         // create a new api instance
-        $mc = $this->getClient();;
+        $mc = $this->getClient();
 
         try {
             /** @var Collection $result */
@@ -558,7 +560,7 @@ class MailchimpSubscribeService extends Component
      * @return array|null
      * @throws DeprecationException
      */
-    public function getMemberTagsByEmail($email, $audienceId = '')
+    public function getMemberTagsByEmail(string $email, string $audienceId = ''): ?array
     {
         $settings = Plugin::$plugin->getSettings();
         $audienceId = $this->prepAudienceId($audienceId);
@@ -570,7 +572,7 @@ class MailchimpSubscribeService extends Component
         }
 
         // check if we got an api key and a list id
-        if ($settings->getApiKey() === '' || $audienceId === '') { // error, no API key or list id
+        if ($audienceId === '' || $settings->getApiKey() === '') { // error, no API key or list id
             Craft::error('API Key or Audience ID not supplied. Check your settings.', __METHOD__);
             return null;
         }
@@ -728,8 +730,9 @@ class MailchimpSubscribeService extends Component
      */
     private function getClient(): Mailchimp
     {
+        /** @var Settings $settings */
         $settings = Plugin::$plugin->getSettings();
-        return new Mailchimp(Craft::parseEnv($settings->getApiKey()));
+        return new Mailchimp(App::parseEnv($settings->getApiKey()));
     }
 
     /**
@@ -762,7 +765,7 @@ class MailchimpSubscribeService extends Component
             $audienceId = $audienceIdArr[0];
         }
 
-        return Craft::parseEnv($audienceId);
+        return App::parseEnv($audienceId);
     }
 
     /**

@@ -1,5 +1,10 @@
 # Mailchimp Subscribe Changelog
 
+## 5.0.0 - 2025-08-03
+
+### Added
+- Added support for Craft 5.
+
 ## 4.0.0 - 2022-05-11
 
 ### Added
